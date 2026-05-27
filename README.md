@@ -6,6 +6,7 @@ This repository keeps the public-safe core ideas from a larger private
 ralphglasses system:
 
 - normalize multiple agent providers behind one small catalog
+- estimate provider token cost and simple budget headroom
 - validate and record planned provider sessions
 - keep local session state in simple JSONL files
 - publish a tiny MCP-style command manifest
@@ -39,6 +40,9 @@ go run . doctor
 
 # List the provider catalog.
 go run . providers
+
+# Estimate token cost and optional budget headroom.
+go run . budget estimate --provider codex --input-tokens 1000 --output-tokens 500 --budget 1 --spent 0.25
 
 # Record a planned session without launching a child process.
 go run . session start --provider codex --repo . --prompt "Summarize this repository"

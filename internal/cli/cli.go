@@ -12,6 +12,7 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	"github.com/hairglasses/open-ralphglasses/internal/budget"
 	"github.com/hairglasses/open-ralphglasses/internal/discovery"
 	"github.com/hairglasses/open-ralphglasses/internal/mcpmanifest"
 	"github.com/hairglasses/open-ralphglasses/internal/provider"
@@ -34,6 +35,8 @@ func Run(args []string, stdout, stderr io.Writer) int {
 	case "version":
 		fmt.Fprintf(stdout, "open-ralphglasses %s\n", version)
 		return 0
+	case "budget":
+		return runBudget(args[1:], stdout, stderr)
 	case "doctor":
 		return runDoctor(stdout)
 	case "providers":
@@ -59,6 +62,7 @@ func printHelp(w io.Writer) {
 Usage:
   open-ralphglasses doctor
   open-ralphglasses providers
+  open-ralphglasses budget estimate --provider codex --input-tokens 1000 --output-tokens 500
   open-ralphglasses session start --provider codex --repo . --prompt "Summarize this repo"
   open-ralphglasses session list
   open-ralphglasses mcp manifest
@@ -81,6 +85,59 @@ func runProviders(stdout io.Writer) int {
 		fmt.Fprintf(tw, "%s\t%s\t%s\t%s\t%s\n", p.ID, p.DisplayName, p.Command, p.DefaultModel, p.Notes)
 	}
 	_ = tw.Flush()
+	return 0
+}
+
+func runBudget(args []string, stdout, stderr io.Writer) int {
+	if len(args) == 0 || args[0] != "estimate" {
+		fmt.Fprintln(stderr, "usage: open-ralphglasses budget estimate --provider codex --input-tokens 1000 --output-tokens 500 [--budget 1.00 --spent 0.25]")
+		return 2
+	}
+	flags := parseFlags(args[1:])
+	inputTokens, ok := parseOptionalIntFlag(flags, "input-tokens", stderr)
+	if !ok {
+		return 2
+	}
+	outputTokens, ok := parseOptionalIntFlag(flags, "output-tokens", stderr)
+	if !ok {
+		return 2
+	}
+	estimate, err := budget.Estimate(budget.EstimateInput{
+		Provider:     flags["provider"],
+		InputTokens:  inputTokens,
+		OutputTokens: outputTokens,
+	})
+	if err != nil {
+		fmt.Fprintf(stderr, "estimate budget: %v\n", err)
+		return 2
+	}
+	result := map[string]any{"estimate": estimate}
+	if flags["budget"] != "" || flags["spent"] != "" {
+		budgetUSD, ok := parseOptionalFloatFlag(flags, "budget", stderr)
+		if !ok {
+			return 2
+		}
+		spentUSD, ok := parseOptionalFloatFlag(flags, "spent", stderr)
+		if !ok {
+			return 2
+		}
+		headroomPct, ok := parseOptionalFloatFlag(flags, "headroom-pct", stderr)
+		if !ok {
+			return 2
+		}
+		status, err := budget.Status(budget.StatusInput{
+			SpentUSD:    spentUSD,
+			BudgetUSD:   budgetUSD,
+			HeadroomPct: headroomPct,
+		})
+		if err != nil {
+			fmt.Fprintf(stderr, "estimate budget: %v\n", err)
+			return 2
+		}
+		result["status"] = status
+	}
+	encoded, _ := json.MarshalIndent(result, "", "  ")
+	fmt.Fprintln(stdout, string(encoded))
 	return 0
 }
 
@@ -218,4 +275,30 @@ func parseFlags(args []string) map[string]string {
 		}
 	}
 	return flags
+}
+
+func parseOptionalIntFlag(flags map[string]string, key string, stderr io.Writer) (int, bool) {
+	raw := strings.TrimSpace(flags[key])
+	if raw == "" {
+		return 0, true
+	}
+	value, err := strconv.Atoi(raw)
+	if err != nil || value < 0 {
+		fmt.Fprintf(stderr, "invalid %s %q\n", key, raw)
+		return 0, false
+	}
+	return value, true
+}
+
+func parseOptionalFloatFlag(flags map[string]string, key string, stderr io.Writer) (float64, bool) {
+	raw := strings.TrimSpace(flags[key])
+	if raw == "" {
+		return 0, true
+	}
+	value, err := strconv.ParseFloat(raw, 64)
+	if err != nil || value < 0 {
+		fmt.Fprintf(stderr, "invalid %s %q\n", key, raw)
+		return 0, false
+	}
+	return value, true
 }

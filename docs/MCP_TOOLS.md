@@ -7,6 +7,7 @@ Current public tools:
 
 - `open_ralph_doctor`
 - `open_ralph_provider_list`
+- `open_ralph_budget_estimate`
 - `open_ralph_session_plan`
 - `open_ralph_session_list`
 - `open_ralph_repo_scan`

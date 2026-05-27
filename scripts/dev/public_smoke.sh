@@ -7,6 +7,7 @@ cd "${repo_root}"
 export GOWORK=off
 
 go test ./...
+go run . budget estimate --provider codex --input-tokens 1000 --output-tokens 500 >/dev/null
 go run . providers >/dev/null
 go run . doctor >/dev/null
 go run . mcp manifest >/dev/null

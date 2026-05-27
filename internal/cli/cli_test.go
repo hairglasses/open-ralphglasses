@@ -19,6 +19,27 @@ func TestRunProviders(t *testing.T) {
 	}
 }
 
+func TestRunBudgetEstimate(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	code := Run([]string{
+		"budget", "estimate",
+		"--provider", "gemini",
+		"--input-tokens", "1000000",
+		"--output-tokens", "500000",
+		"--budget", "1",
+		"--spent", "0.90",
+	}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("code=%d stderr=%s", code, stderr.String())
+	}
+	output := stdout.String()
+	for _, want := range []string{`"provider": "gemini"`, `"estimated_usd": 0.45`, `"should_stop": true`} {
+		if !strings.Contains(output, want) {
+			t.Fatalf("budget output missing %q: %s", want, output)
+		}
+	}
+}
+
 func TestRunMCPManifest(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	code := Run([]string{"mcp", "manifest"}, &stdout, &stderr)

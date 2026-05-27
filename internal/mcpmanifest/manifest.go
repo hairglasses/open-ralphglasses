@@ -26,6 +26,12 @@ func Manifest() []Tool {
 			ReadOnly:    true,
 		},
 		{
+			Name:        "open_ralph_budget_estimate",
+			Description: "Estimate provider token cost and evaluate optional budget headroom",
+			ReadOnly:    true,
+			Inputs:      []string{"provider", "input_tokens", "output_tokens", "budget", "spent"},
+		},
+		{
 			Name:        "open_ralph_session_plan",
 			Description: "Validate and record a planned provider session",
 			ReadOnly:    false,
