@@ -1,10 +1,4 @@
-// Package mcpadapter exposes the public tool manifest through in-process calls.
-//
-// The private project has a full MCP server with middleware, resources,
-// prompts, hooks, telemetry, and deferred loading. This public adapter is much
-// smaller: it dispatches manifest tool names to the existing public packages and
-// returns JSON-friendly results. A future stdio or HTTP transport can sit above
-// this package without duplicating command logic.
+// Package mcpadapter exposes the tool manifest through in-process calls.
 package mcpadapter
 
 import (
@@ -13,19 +7,13 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/hairglasses/open-ralphglasses/internal/budget"
-	"github.com/hairglasses/open-ralphglasses/internal/discovery"
 	"github.com/hairglasses/open-ralphglasses/internal/hookgate"
 	"github.com/hairglasses/open-ralphglasses/internal/launchplan"
 	"github.com/hairglasses/open-ralphglasses/internal/loopplan"
 	"github.com/hairglasses/open-ralphglasses/internal/mcpmanifest"
-	"github.com/hairglasses/open-ralphglasses/internal/processrun"
 	"github.com/hairglasses/open-ralphglasses/internal/provider"
-	"github.com/hairglasses/open-ralphglasses/internal/session"
-	"github.com/hairglasses/open-ralphglasses/internal/sessionlog"
-	"github.com/hairglasses/open-ralphglasses/internal/worktree"
 )
 
 // Result is the stable public call envelope.
@@ -45,38 +33,24 @@ type ProviderStatus struct {
 
 // Call dispatches a public tool by name. Parameter names match the manifest.
 func Call(ctx context.Context, toolName string, params map[string]any) Result {
+	_ = ctx
 	toolName = strings.TrimSpace(toolName)
 	if params == nil {
 		params = map[string]any{}
 	}
-	payload, err := callPayload(ctx, toolName, params)
+	payload, err := callPayload(toolName, params)
 	if err != nil {
 		return Result{OK: false, Tool: toolName, Error: err.Error()}
 	}
 	return Result{OK: true, Tool: toolName, Payload: payload}
 }
 
-func callPayload(ctx context.Context, toolName string, params map[string]any) (any, error) {
+func callPayload(toolName string, params map[string]any) (any, error) {
 	switch toolName {
 	case "open_ralph_doctor":
 		return providerStatuses(), nil
 	case "open_ralph_provider_list":
 		return provider.Catalog(), nil
-	case "open_ralph_process_run":
-		timeoutSeconds, err := intParam(params, "timeout_seconds")
-		if err != nil {
-			return nil, err
-		}
-		outputLimit, err := intParam(params, "output_limit")
-		if err != nil {
-			return nil, err
-		}
-		return processrun.Run(ctx, processrun.Options{
-			RepoPath:    stringParam(params, "repo"),
-			Command:     commandParam(params, "command"),
-			Timeout:     time.Duration(timeoutSeconds) * time.Second,
-			OutputLimit: outputLimit,
-		})
 	case "open_ralph_budget_estimate":
 		inputTokens, err := intParam(params, "input_tokens")
 		if err != nil {
@@ -142,60 +116,11 @@ func callPayload(ctx context.Context, toolName string, params map[string]any) (a
 			VerifyCommand: stringParam(params, "verify"),
 			MaxIterations: maxIterations,
 		})
-	case "open_ralph_session_plan":
-		sess, err := session.New(session.StartOptions{
-			Provider: stringParam(params, "provider"),
-			RepoPath: stringParam(params, "repo"),
-			Prompt:   stringParam(params, "prompt"),
-		})
-		if err != nil {
-			return nil, err
-		}
-		if boolParam(params, "record") {
-			if err := (session.Store{Root: firstNonEmpty(stringParam(params, "root"), ".")}).Append(sess); err != nil {
-				return nil, err
-			}
-		}
-		return sess, nil
-	case "open_ralph_session_list":
-		return (session.Store{Root: firstNonEmpty(stringParam(params, "root"), ".")}).List()
-	case "open_ralph_session_inspect":
-		return transcriptStore(params).Load(stringParam(params, "id"))
-	case "open_ralph_session_analyze":
-		ps, err := transcriptStore(params).Load(stringParam(params, "id"))
-		if err != nil {
-			return nil, err
-		}
-		return sessionlog.Analyze(ps), nil
-	case "open_ralph_session_replay_text":
-		ps, err := transcriptStore(params).Load(stringParam(params, "id"))
-		if err != nil {
-			return nil, err
-		}
-		return map[string]string{"text": sessionlog.RenderReplayText(ps.Transcript)}, nil
-	case "open_ralph_repo_scan":
-		depth, err := intParam(params, "depth")
-		if err != nil {
-			return nil, err
-		}
-		if depth == 0 {
-			depth = 3
-		}
-		return discovery.Scan(ctx, firstNonEmpty(stringParam(params, "root"), "."), depth)
-	case "open_ralph_worktree_path":
-		root := firstNonEmpty(stringParam(params, "root"), ".open-ralph/worktrees")
-		repo := firstNonEmpty(stringParam(params, "repo"), "repo")
-		label := firstNonEmpty(stringParam(params, "label"), "work")
-		return map[string]string{"path": worktree.ManagedPath(root, repo, label)}, nil
 	case "open_ralph_tool_manifest":
 		return mcpmanifest.Manifest(), nil
 	default:
 		return nil, fmt.Errorf("unknown public tool %q", toolName)
 	}
-}
-
-func transcriptStore(params map[string]any) sessionlog.Store {
-	return sessionlog.Store{Root: firstNonEmpty(stringParam(params, "root"), ".")}
 }
 
 func providerStatuses() []ProviderStatus {
@@ -275,44 +200,6 @@ func floatParam(params map[string]any, key string) float64 {
 	default:
 		f, _ := strconv.ParseFloat(strings.TrimSpace(fmt.Sprint(v)), 64)
 		return f
-	}
-}
-
-func boolParam(params map[string]any, key string) bool {
-	value, ok := params[key]
-	if !ok || value == nil {
-		return false
-	}
-	switch v := value.(type) {
-	case bool:
-		return v
-	case string:
-		parsed, _ := strconv.ParseBool(strings.TrimSpace(v))
-		return parsed
-	default:
-		return false
-	}
-}
-
-func commandParam(params map[string]any, key string) []string {
-	value, ok := params[key]
-	if !ok || value == nil {
-		return nil
-	}
-	switch v := value.(type) {
-	case []string:
-		return v
-	case []any:
-		out := make([]string, 0, len(v))
-		for _, item := range v {
-			part := strings.TrimSpace(fmt.Sprint(item))
-			if part != "" {
-				out = append(out, part)
-			}
-		}
-		return out
-	default:
-		return strings.Fields(fmt.Sprint(v))
 	}
 }
 

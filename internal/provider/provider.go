@@ -1,10 +1,4 @@
-// Package provider contains the public, provider-neutral launch catalog.
-//
-// The private ralphglasses tree has many provider, account, and local runtime
-// integrations. This public package keeps only the portable contract: a provider
-// has a stable id, a human label, an executable name, and a default model. The
-// CLI can print or validate that contract without knowing any private account,
-// key-pool, or machine-specific details.
+// Package provider contains the provider-neutral launch catalog.
 package provider
 
 import (
@@ -18,7 +12,7 @@ import (
 //
 // Command intentionally stores only the executable name. Arguments are assembled
 // by the caller so applications can choose their own prompting, sandboxing, and
-// environment policy without this package needing secrets or local paths.
+// environment policy without this package needing tokens or local paths.
 type Provider struct {
 	ID           string
 	DisplayName  string
@@ -27,9 +21,7 @@ type Provider struct {
 	Notes        string
 }
 
-// Catalog returns the built-in public providers. These are examples of the
-// provider-normalization pattern from ralphglasses, reduced to data that is safe
-// to publish and easy to adapt.
+// Catalog returns the built-in providers supported by the planning commands.
 func Catalog() []Provider {
 	return []Provider{
 		{

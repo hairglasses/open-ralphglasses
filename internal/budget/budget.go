@@ -1,10 +1,4 @@
-// Package budget contains public-safe cost and budget helpers.
-//
-// Private ralphglasses tracks live provider sessions, usage ledgers, and
-// operator-specific budget policy. This package keeps the portable core: turn
-// token counts into an estimated cost and evaluate that cost against a simple
-// budget threshold. The built-in rates are examples; production users should
-// pass their own current rates at the boundary where provider pricing is known.
+// Package budget contains cost and budget helpers for provider planning.
 package budget
 
 import (

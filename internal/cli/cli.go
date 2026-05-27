@@ -7,24 +7,17 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"text/tabwriter"
-	"time"
 
 	"github.com/hairglasses/open-ralphglasses/internal/budget"
-	"github.com/hairglasses/open-ralphglasses/internal/discovery"
 	"github.com/hairglasses/open-ralphglasses/internal/hookgate"
 	"github.com/hairglasses/open-ralphglasses/internal/launchplan"
 	"github.com/hairglasses/open-ralphglasses/internal/loopplan"
 	"github.com/hairglasses/open-ralphglasses/internal/mcpadapter"
 	"github.com/hairglasses/open-ralphglasses/internal/mcpmanifest"
-	"github.com/hairglasses/open-ralphglasses/internal/processrun"
 	"github.com/hairglasses/open-ralphglasses/internal/provider"
-	"github.com/hairglasses/open-ralphglasses/internal/session"
-	"github.com/hairglasses/open-ralphglasses/internal/sessionlog"
-	"github.com/hairglasses/open-ralphglasses/internal/worktree"
 )
 
 const version = "0.1.0"
@@ -54,16 +47,8 @@ func Run(args []string, stdout, stderr io.Writer) int {
 		return runLoop(args[1:], stdout, stderr)
 	case "providers":
 		return runProviders(stdout)
-	case "process":
-		return runProcess(args[1:], stdout, stderr)
-	case "session":
-		return runSession(args[1:], stdout, stderr)
 	case "mcp":
 		return runMCP(args[1:], stdout, stderr)
-	case "repos":
-		return runRepos(args[1:], stdout, stderr)
-	case "worktree":
-		return runWorktree(args[1:], stdout, stderr)
 	default:
 		fmt.Fprintf(stderr, "unknown command %q\n\n", args[0])
 		printHelp(stderr)
@@ -81,14 +66,8 @@ Usage:
   open-ralphglasses hook check --event PreToolUse --tool Bash --input "git status"
   open-ralphglasses launch plan --provider codex --repo . --prompt "Summarize this repo"
   open-ralphglasses loop plan --repo . --goal "Add tests" --verify "go test ./..."
-  open-ralphglasses process run --repo . -- go version
-  open-ralphglasses session start --provider codex --repo . --prompt "Summarize this repo"
-  open-ralphglasses session list
-  open-ralphglasses session analyze --id sess-example
   open-ralphglasses mcp manifest
-  open-ralphglasses mcp call open_ralph_provider_list
-  open-ralphglasses repos scan --root . --depth 3
-  open-ralphglasses worktree path --repo example --label refactor-api`)
+  open-ralphglasses mcp call open_ralph_provider_list`)
 }
 
 func runDoctor(stdout io.Writer) int {
@@ -250,136 +229,6 @@ func runLoop(args []string, stdout, stderr io.Writer) int {
 	return 0
 }
 
-func runProcess(args []string, stdout, stderr io.Writer) int {
-	if len(args) == 0 || args[0] != "run" {
-		fmt.Fprintln(stderr, "usage: open-ralphglasses process run --repo . [--timeout-seconds 30 --output-limit 65536] -- command arg")
-		return 2
-	}
-	flagArgs, command := splitCommandArgs(args[1:])
-	if len(command) == 0 {
-		fmt.Fprintln(stderr, "process command is required after --")
-		return 2
-	}
-	flags := parseFlags(flagArgs)
-	timeoutSeconds, ok := parseOptionalIntFlag(flags, "timeout-seconds", stderr)
-	if !ok {
-		return 2
-	}
-	outputLimit, ok := parseOptionalIntFlag(flags, "output-limit", stderr)
-	if !ok {
-		return 2
-	}
-	result, err := processrun.Run(context.Background(), processrun.Options{
-		RepoPath:    flags["repo"],
-		Command:     command,
-		Timeout:     time.Duration(timeoutSeconds) * time.Second,
-		OutputLimit: outputLimit,
-	})
-	if err != nil {
-		fmt.Fprintf(stderr, "run process: %v\n", err)
-		return 2
-	}
-	encoded, _ := json.MarshalIndent(result, "", "  ")
-	fmt.Fprintln(stdout, string(encoded))
-	if result.ExitCode != 0 {
-		return 1
-	}
-	return 0
-}
-
-func runSession(args []string, stdout, stderr io.Writer) int {
-	if len(args) == 0 {
-		fmt.Fprintln(stderr, "session subcommand is required: start or list")
-		return 2
-	}
-	switch args[0] {
-	case "start":
-		return runSessionStart(args[1:], stdout, stderr)
-	case "list":
-		store := session.Store{Root: "."}
-		sessions, err := store.List()
-		if err != nil {
-			fmt.Fprintf(stderr, "list sessions: %v\n", err)
-			return 1
-		}
-		encoded, _ := json.MarshalIndent(sessions, "", "  ")
-		fmt.Fprintln(stdout, string(encoded))
-		return 0
-	case "inspect":
-		return runSessionInspect(args[1:], stdout, stderr)
-	case "analyze":
-		return runSessionAnalyze(args[1:], stdout, stderr)
-	case "replay-text":
-		return runSessionReplayText(args[1:], stdout, stderr)
-	default:
-		fmt.Fprintf(stderr, "unknown session subcommand %q\n", args[0])
-		return 2
-	}
-}
-
-func runSessionStart(args []string, stdout, stderr io.Writer) int {
-	flags := parseFlags(args)
-	sess, err := session.New(session.StartOptions{
-		Provider: flags["provider"],
-		RepoPath: flags["repo"],
-		Prompt:   flags["prompt"],
-	})
-	if err != nil {
-		fmt.Fprintf(stderr, "plan session: %v\n", err)
-		return 2
-	}
-	if err := (session.Store{Root: "."}).Append(sess); err != nil {
-		fmt.Fprintf(stderr, "write session: %v\n", err)
-		return 1
-	}
-	encoded, _ := json.MarshalIndent(sess, "", "  ")
-	fmt.Fprintln(stdout, string(encoded))
-	return 0
-}
-
-func runSessionInspect(args []string, stdout, stderr io.Writer) int {
-	flags := parseFlags(args)
-	ps, err := loadTranscriptFromFlags(flags)
-	if err != nil {
-		fmt.Fprintf(stderr, "inspect session: %v\n", err)
-		return 1
-	}
-	encoded, _ := json.MarshalIndent(ps, "", "  ")
-	fmt.Fprintln(stdout, string(encoded))
-	return 0
-}
-
-func runSessionAnalyze(args []string, stdout, stderr io.Writer) int {
-	flags := parseFlags(args)
-	ps, err := loadTranscriptFromFlags(flags)
-	if err != nil {
-		fmt.Fprintf(stderr, "analyze session: %v\n", err)
-		return 1
-	}
-	encoded, _ := json.MarshalIndent(sessionlog.Analyze(ps), "", "  ")
-	fmt.Fprintln(stdout, string(encoded))
-	return 0
-}
-
-func runSessionReplayText(args []string, stdout, stderr io.Writer) int {
-	flags := parseFlags(args)
-	ps, err := loadTranscriptFromFlags(flags)
-	if err != nil {
-		fmt.Fprintf(stderr, "replay session: %v\n", err)
-		return 1
-	}
-	fmt.Fprintln(stdout, sessionlog.RenderReplayText(ps.Transcript))
-	return 0
-}
-
-func loadTranscriptFromFlags(flags map[string]string) (sessionlog.PersistedSession, error) {
-	id := strings.TrimSpace(flags["id"])
-	if id == "" {
-		return sessionlog.PersistedSession{}, fmt.Errorf("--id is required")
-	}
-	return (sessionlog.Store{Root: flags["root"]}).Load(id)
-}
-
 func runMCP(args []string, stdout, stderr io.Writer) int {
 	if len(args) == 1 && args[0] == "manifest" {
 		encoded, _ := json.MarshalIndent(mcpmanifest.Manifest(), "", "  ")
@@ -413,57 +262,6 @@ func runMCPCall(args []string, stdout, stderr io.Writer) int {
 	return 0
 }
 
-func runRepos(args []string, stdout, stderr io.Writer) int {
-	if len(args) == 0 || args[0] != "scan" {
-		fmt.Fprintln(stderr, "usage: open-ralphglasses repos scan --root . --depth 3")
-		return 2
-	}
-	flags := parseFlags(args[1:])
-	root := flags["root"]
-	if root == "" {
-		root = "."
-	}
-	depth := 3
-	if flags["depth"] != "" {
-		parsed, err := strconv.Atoi(flags["depth"])
-		if err != nil || parsed < 1 {
-			fmt.Fprintf(stderr, "invalid depth %q\n", flags["depth"])
-			return 2
-		}
-		depth = parsed
-	}
-	repos, err := discovery.Scan(context.Background(), root, depth)
-	if err != nil {
-		fmt.Fprintf(stderr, "scan repos: %v\n", err)
-		return 1
-	}
-	encoded, _ := json.MarshalIndent(repos, "", "  ")
-	fmt.Fprintln(stdout, string(encoded))
-	return 0
-}
-
-func runWorktree(args []string, stdout, stderr io.Writer) int {
-	if len(args) == 0 || args[0] != "path" {
-		fmt.Fprintln(stderr, "usage: open-ralphglasses worktree path --repo example --label task")
-		return 2
-	}
-	flags := parseFlags(args[1:])
-	root := flags["root"]
-	if root == "" {
-		root = filepath.Join(".", ".open-ralph", "worktrees")
-	}
-	repoName := flags["repo"]
-	if repoName == "" {
-		repoName = "repo"
-	}
-	label := flags["label"]
-	if label == "" {
-		label = "work"
-	}
-	fmt.Fprintln(stdout, worktree.ManagedPath(root, repoName, label))
-	return 0
-}
-
 func parseFlags(args []string) map[string]string {
 	flags := make(map[string]string)
 	for i := 0; i < len(args); i++ {
@@ -493,15 +291,6 @@ func parseFlags(args []string) map[string]string {
 		}
 	}
 	return flags
-}
-
-func splitCommandArgs(args []string) ([]string, []string) {
-	for i, arg := range args {
-		if arg == "--" {
-			return args[:i], args[i+1:]
-		}
-	}
-	return args, nil
 }
 
 func parseCallParams(args []string) (map[string]any, error) {

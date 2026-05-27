@@ -15,30 +15,35 @@ go run . providers >/dev/null
 go run . doctor >/dev/null
 go run . mcp manifest >/dev/null
 go run . mcp call open_ralph_budget_estimate --param provider=codex --param input_tokens=1000 --param output_tokens=500 >/dev/null
-go run . process run --repo . --timeout-seconds 10 -- go version >/dev/null
-tmp_root="$(mktemp -d)"
-trap 'rm -rf "${tmp_root}"' EXIT
-mkdir -p "${tmp_root}/.open-ralph/transcripts"
-cat >"${tmp_root}/.open-ralph/transcripts/sess-smoke.json" <<'JSON'
-{
-  "schema_version": 1,
-  "snapshot": {
-    "id": "sess-smoke",
-    "provider": "codex",
-    "provider_session_id": "provider-smoke"
-  },
-  "transcript": [
-    {"kind": "operator_message", "session_id": "sess-smoke", "text": "Inspect this repository", "at": "2026-05-27T00:00:00Z"},
-    {"kind": "delta", "session_id": "sess-smoke", "channel": "text", "text": "Done", "at": "2026-05-27T00:00:01Z"},
-    {"kind": "end", "session_id": "sess-smoke", "stop_reason": "end_turn", "at": "2026-05-27T00:00:02Z"}
-  ]
-}
-JSON
-go run . session analyze --root "${tmp_root}" --id sess-smoke >/dev/null
-go run . session replay-text --root "${tmp_root}" --id sess-smoke >/dev/null
-go run . mcp call open_ralph_session_analyze --param root="${tmp_root}" --param id=sess-smoke >/dev/null
-go run . worktree path --repo example --label smoke >/dev/null
-go run . repos scan --root . >/dev/null
+
+for encoded in \
+  czJm \
+  a2lh \
+  c2VjcmV0c3R1ZGlvcw== \
+  cnVubXlsaWZl \
+  am9iYg== \
+  Z21haWw= \
+  bGlua2VkaW4= \
+  cmVzdW1l \
+  dGVuYW50 \
+  dmF1bHQ= \
+  YnJvd3NlciBzdGF0ZQ== \
+  cHJpdmF0ZSByYWxwaGdsYXNzZXM= \
+  cHJpdmF0ZSBwcm9qZWN0 \
+  cHJpdmF0ZSBzeXN0ZW0= \
+  bGFyZ2VyIHByaXZhdGU= \
+  cGVyc29uYWw= \
+  bWFjaGluZS1zcGVjaWZpYw== \
+  aW50ZXJuYWwgb3BlcmF0aW9uYWw= \
+  aGFpcmdsYXNzZXMtc3R1ZGlv \
+  YXJjaGdsYXNzZXM=
+do
+  marker="$(printf '%s' "${encoded}" | base64 -d)"
+  if rg -n -i --fixed-strings --hidden --glob '!/.git/**' -- "${marker}" .; then
+    echo "public marker guard failed" >&2
+    exit 1
+  fi
+done
 
 if command -v gitleaks >/dev/null 2>&1; then
   gitleaks detect --source . --redact

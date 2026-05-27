@@ -1,6 +1,4 @@
-.open-ralph/
 bin/
 dist/
 coverage.out
 *.test
-

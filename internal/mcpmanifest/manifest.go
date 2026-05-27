@@ -22,19 +22,13 @@ func Manifest() []Tool {
 		},
 		{
 			Name:        "open_ralph_doctor",
-			Description: "Check provider executables and public state directory readiness",
+			Description: "Check provider executable availability",
 			ReadOnly:    true,
 		},
 		{
 			Name:        "open_ralph_provider_list",
 			Description: "List configured public providers",
 			ReadOnly:    true,
-		},
-		{
-			Name:        "open_ralph_process_run",
-			Description: "Run one explicit no-shell process with timeout and capped output",
-			ReadOnly:    false,
-			Inputs:      []string{"repo", "timeout_seconds", "output_limit", "command"},
 		},
 		{
 			Name:        "open_ralph_budget_estimate",
@@ -59,48 +53,6 @@ func Manifest() []Tool {
 			Description: "Build a review-only iterative work plan with verification gates",
 			ReadOnly:    true,
 			Inputs:      []string{"repo", "goal", "provider", "verify", "max_iterations"},
-		},
-		{
-			Name:        "open_ralph_session_plan",
-			Description: "Validate and record a planned provider session",
-			ReadOnly:    false,
-			Inputs:      []string{"provider", "repo", "prompt", "record", "root"},
-		},
-		{
-			Name:        "open_ralph_session_list",
-			Description: "List planned sessions from the local JSONL ledger",
-			ReadOnly:    true,
-			Inputs:      []string{"root"},
-		},
-		{
-			Name:        "open_ralph_session_inspect",
-			Description: "Read a persisted provider-neutral session transcript",
-			ReadOnly:    true,
-			Inputs:      []string{"root", "id"},
-		},
-		{
-			Name:        "open_ralph_session_analyze",
-			Description: "Summarize a persisted session transcript for replay readiness",
-			ReadOnly:    true,
-			Inputs:      []string{"root", "id"},
-		},
-		{
-			Name:        "open_ralph_session_replay_text",
-			Description: "Render compact replay text from a persisted session transcript",
-			ReadOnly:    true,
-			Inputs:      []string{"root", "id"},
-		},
-		{
-			Name:        "open_ralph_repo_scan",
-			Description: "Scan a workspace for Git repos and explicit public opt-in markers",
-			ReadOnly:    true,
-			Inputs:      []string{"root", "depth"},
-		},
-		{
-			Name:        "open_ralph_worktree_path",
-			Description: "Compute a deterministic managed worktree path",
-			ReadOnly:    true,
-			Inputs:      []string{"root", "repo", "label"},
 		},
 	}
 }

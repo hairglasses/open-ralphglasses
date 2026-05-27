@@ -1,9 +1,4 @@
-// Package hookgate evaluates public-safe hook decisions for proposed tool use.
-//
-// The private project can execute provider hooks and consult local operator
-// policy. This package keeps the reusable part: normalize provider event names,
-// inspect a proposed action, and return an auditable allow/warn/block verdict.
-// It does not execute hooks, inspect credentials, or read private config files.
+// Package hookgate evaluates hook decisions for proposed tool use.
 package hookgate
 
 import (

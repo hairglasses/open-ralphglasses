@@ -1,8 +1,4 @@
 // Package loopplan builds review-only plans for iterative agent work.
-//
-// The private system can run perpetual loops, observe regressions, and relaunch
-// providers. This public package keeps a smaller contract: describe the loop,
-// verification gate, and stop conditions in JSON before any runner exists.
 package loopplan
 
 import (

@@ -1,11 +1,4 @@
-// Package launchplan builds public, reviewable provider command plans.
-//
-// Private ralphglasses can launch, supervise, meter, and recover real provider
-// processes. This public package deliberately stops one step earlier: it turns a
-// provider-neutral request into a command shape that humans and tests can
-// inspect before any process execution layer exists. That keeps the useful
-// normalization pattern while avoiding secrets, local launcher wrappers,
-// account policy, browser state, and machine-specific process management.
+// Package launchplan builds reviewable provider command plans.
 package launchplan
 
 import (

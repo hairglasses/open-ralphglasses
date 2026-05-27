@@ -1,50 +1,32 @@
 # Architecture
 
-`open-ralphglasses` is split into small packages with explicit public contracts.
+`open-ralphglasses` is split into small packages with explicit contracts.
 
 | Package | Purpose |
 |---|---|
 | `internal/provider` | Provider catalog and validation. |
-| `internal/budget` | Public cost estimates and budget headroom checks. |
-| `internal/chatevents` | Provider-neutral transcript event schema. |
-| `internal/hookgate` | Public allow/warn/block decisions for proposed hook actions. |
+| `internal/budget` | Cost estimates and budget headroom checks. |
+| `internal/hookgate` | Allow, warn, and block decisions for proposed hook actions. |
 | `internal/launchplan` | Review-only provider CLI command planning. |
 | `internal/loopplan` | Review-only iterative work plans with verification gates. |
-| `internal/mcpadapter` | In-process dispatch for public MCP-style tool names. |
-| `internal/processrun` | Explicit no-shell process execution with timeout and capped output. |
-| `internal/session` | Durable JSONL session planning ledger. |
-| `internal/sessionlog` | Durable transcript artifacts, analysis, and replay text. |
-| `internal/events` | Bounded in-memory event history for adapters. |
-| `internal/discovery` | Public workspace scan over Git repos and `.open-ralphrc` opt-in files. |
-| `internal/worktree` | Deterministic managed worktree path planning. |
-| `internal/mcpmanifest` | Machine-readable public command manifest. |
+| `internal/mcpadapter` | In-process dispatch for MCP-style tool names. |
+| `internal/mcpmanifest` | Machine-readable command manifest. |
 | `internal/cli` | Thin command routing over the packages above. |
-
-The current version records planned sessions rather than launching provider
-processes. That is intentional: process execution, credential policy, remote
-workers, browser automation, and tenant state need separate public design before
-they belong in this repository.
 
 ## Data Flow
 
-1. CLI parses public command flags.
-2. `internal/provider` validates the provider id.
-3. Command packages normalize repo, prompt, hook, loop, process, discovery, or
-   path metadata.
-4. `internal/session.Store` appends session plans under `.open-ralph/` when the
-   session command is used.
-5. Future TUI, MCP, or HTTP adapters can read the same public package outputs.
+1. The CLI parses command flags.
+2. Package-level validation normalizes provider ids, repo paths, prompts, and
+   option values.
+3. Planning packages return JSON-friendly structs for command plans, loop
+   plans, cost estimates, and hook decisions.
+4. The MCP-style adapter dispatches to the same packages so command behavior
+   stays consistent across entry points.
 
 ## Extension Points
 
 - Add a provider by extending `provider.Catalog`.
-- Add provider pricing by passing explicit rates into `internal/budget` instead
-  of treating example rates as current billing truth.
-- Add process execution only above `internal/launchplan`, after deciding how the
-  caller will review environment and permission policy.
-- Add a command by wiring a package function in `internal/cli`.
-- Add MCP transport by adapting `mcpmanifest.Manifest`.
-- Add repo metadata by teaching `internal/discovery` about another explicit,
-  public-safe marker file.
-- Add real launches by building an explicit process package above
-  `session.New`, with tests for command construction and cancellation.
+- Add provider pricing by passing explicit rates into `budget.Estimate`.
+- Add a planning command by wiring a package function in `internal/cli`.
+- Add transport support by adapting `mcpmanifest.Manifest` and
+  `mcpadapter.Call`.
