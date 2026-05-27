@@ -10,6 +10,7 @@ Current public tools:
 - `open_ralph_budget_estimate`
 - `open_ralph_hook_check`
 - `open_ralph_launch_plan`
+- `open_ralph_loop_plan`
 - `open_ralph_session_plan`
 - `open_ralph_session_list`
 - `open_ralph_repo_scan`

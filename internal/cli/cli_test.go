@@ -79,6 +79,27 @@ func TestRunHookCheck(t *testing.T) {
 	}
 }
 
+func TestRunLoopPlan(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	code := Run([]string{
+		"loop", "plan",
+		"--repo", ".",
+		"--goal", "add tests",
+		"--provider", "codex",
+		"--verify", "go test ./...",
+		"--max-iterations", "2",
+	}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("code=%d stderr=%s", code, stderr.String())
+	}
+	output := stdout.String()
+	for _, want := range []string{`"goal": "add tests"`, `"provider": "codex"`, `"execution_status": "planned_only"`} {
+		if !strings.Contains(output, want) {
+			t.Fatalf("loop output missing %q: %s", want, output)
+		}
+	}
+}
+
 func TestRunMCPManifest(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	code := Run([]string{"mcp", "manifest"}, &stdout, &stderr)

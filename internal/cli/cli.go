@@ -16,6 +16,7 @@ import (
 	"github.com/hairglasses/open-ralphglasses/internal/discovery"
 	"github.com/hairglasses/open-ralphglasses/internal/hookgate"
 	"github.com/hairglasses/open-ralphglasses/internal/launchplan"
+	"github.com/hairglasses/open-ralphglasses/internal/loopplan"
 	"github.com/hairglasses/open-ralphglasses/internal/mcpmanifest"
 	"github.com/hairglasses/open-ralphglasses/internal/provider"
 	"github.com/hairglasses/open-ralphglasses/internal/session"
@@ -45,6 +46,8 @@ func Run(args []string, stdout, stderr io.Writer) int {
 		return runHook(args[1:], stdout, stderr)
 	case "launch":
 		return runLaunch(args[1:], stdout, stderr)
+	case "loop":
+		return runLoop(args[1:], stdout, stderr)
 	case "providers":
 		return runProviders(stdout)
 	case "session":
@@ -71,6 +74,7 @@ Usage:
   open-ralphglasses budget estimate --provider codex --input-tokens 1000 --output-tokens 500
   open-ralphglasses hook check --event PreToolUse --tool Bash --input "git status"
   open-ralphglasses launch plan --provider codex --repo . --prompt "Summarize this repo"
+  open-ralphglasses loop plan --repo . --goal "Add tests" --verify "go test ./..."
   open-ralphglasses session start --provider codex --repo . --prompt "Summarize this repo"
   open-ralphglasses session list
   open-ralphglasses mcp manifest
@@ -204,6 +208,32 @@ func runLaunch(args []string, stdout, stderr io.Writer) int {
 	})
 	if err != nil {
 		fmt.Fprintf(stderr, "plan launch: %v\n", err)
+		return 2
+	}
+	encoded, _ := json.MarshalIndent(plan, "", "  ")
+	fmt.Fprintln(stdout, string(encoded))
+	return 0
+}
+
+func runLoop(args []string, stdout, stderr io.Writer) int {
+	if len(args) == 0 || args[0] != "plan" {
+		fmt.Fprintln(stderr, "usage: open-ralphglasses loop plan --repo . --goal \"Add tests\" [--provider codex --verify \"go test ./...\" --max-iterations 3]")
+		return 2
+	}
+	flags := parseFlags(args[1:])
+	maxIterations, ok := parseOptionalIntFlag(flags, "max-iterations", stderr)
+	if !ok {
+		return 2
+	}
+	plan, err := loopplan.Build(loopplan.Options{
+		RepoPath:      flags["repo"],
+		Goal:          flags["goal"],
+		Provider:      flags["provider"],
+		VerifyCommand: flags["verify"],
+		MaxIterations: maxIterations,
+	})
+	if err != nil {
+		fmt.Fprintf(stderr, "plan loop: %v\n", err)
 		return 2
 	}
 	encoded, _ := json.MarshalIndent(plan, "", "  ")

@@ -9,6 +9,7 @@ ralphglasses system:
 - estimate provider token cost and simple budget headroom
 - evaluate public hook-gate decisions for proposed tool actions
 - build review-only provider launch plans without starting child processes
+- build review-only loop plans with verification gates and stop conditions
 - validate and record planned provider sessions
 - keep local session state in simple JSONL files
 - publish a tiny MCP-style command manifest
@@ -51,6 +52,9 @@ go run . hook check --event PreToolUse --tool Bash --input "git status --short"
 
 # Build an inspectable provider command plan without executing it.
 go run . launch plan --provider codex --repo . --prompt "Summarize this repository" --permission-mode read-only
+
+# Build an inspectable iterative work plan without executing it.
+go run . loop plan --repo . --goal "Improve tests" --provider codex --verify "go test ./..."
 
 # Record a planned session without launching a child process.
 go run . session start --provider codex --repo . --prompt "Summarize this repository"

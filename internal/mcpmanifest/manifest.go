@@ -44,6 +44,12 @@ func Manifest() []Tool {
 			Inputs:      []string{"provider", "repo", "prompt", "model", "permission_mode", "budget", "max_turns"},
 		},
 		{
+			Name:        "open_ralph_loop_plan",
+			Description: "Build a review-only iterative work plan with verification gates",
+			ReadOnly:    true,
+			Inputs:      []string{"repo", "goal", "provider", "verify", "max_iterations"},
+		},
+		{
 			Name:        "open_ralph_session_plan",
 			Description: "Validate and record a planned provider session",
 			ReadOnly:    false,
