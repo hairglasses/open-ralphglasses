@@ -91,6 +91,10 @@ The first public version is deliberately small. It is a clean-room public subset
 not a full mirror of the private repository history. The code and docs are
 designed to be inspectable, example-driven, and free of private references.
 
+See [docs/PUBLIC_BOUNDARY.md](docs/PUBLIC_BOUNDARY.md) for the extraction
+boundary and [docs/PORTFOLIO.md](docs/PORTFOLIO.md) for an interviewer-oriented
+guide to the main engineering artifacts.
+
 ## Development
 
 ```bash
