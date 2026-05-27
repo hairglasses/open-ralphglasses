@@ -18,6 +18,7 @@ import (
 	"github.com/hairglasses/open-ralphglasses/internal/hookgate"
 	"github.com/hairglasses/open-ralphglasses/internal/launchplan"
 	"github.com/hairglasses/open-ralphglasses/internal/loopplan"
+	"github.com/hairglasses/open-ralphglasses/internal/mcpadapter"
 	"github.com/hairglasses/open-ralphglasses/internal/mcpmanifest"
 	"github.com/hairglasses/open-ralphglasses/internal/processrun"
 	"github.com/hairglasses/open-ralphglasses/internal/provider"
@@ -83,6 +84,7 @@ Usage:
   open-ralphglasses session start --provider codex --repo . --prompt "Summarize this repo"
   open-ralphglasses session list
   open-ralphglasses mcp manifest
+  open-ralphglasses mcp call open_ralph_provider_list
   open-ralphglasses repos scan --root . --depth 3
   open-ralphglasses worktree path --repo example --label refactor-api`)
 }
@@ -328,12 +330,35 @@ func runSessionStart(args []string, stdout, stderr io.Writer) int {
 }
 
 func runMCP(args []string, stdout, stderr io.Writer) int {
-	if len(args) != 1 || args[0] != "manifest" {
-		fmt.Fprintln(stderr, "usage: open-ralphglasses mcp manifest")
+	if len(args) == 1 && args[0] == "manifest" {
+		encoded, _ := json.MarshalIndent(mcpmanifest.Manifest(), "", "  ")
+		fmt.Fprintln(stdout, string(encoded))
+		return 0
+	}
+	if len(args) >= 2 && args[0] == "call" {
+		return runMCPCall(args[1:], stdout, stderr)
+	}
+	fmt.Fprintln(stderr, "usage: open-ralphglasses mcp <manifest|call>")
+	return 2
+}
+
+func runMCPCall(args []string, stdout, stderr io.Writer) int {
+	toolName := strings.TrimSpace(args[0])
+	if toolName == "" {
+		fmt.Fprintln(stderr, "usage: open-ralphglasses mcp call <tool-name> [--param key=value] [--json '{...}']")
 		return 2
 	}
-	encoded, _ := json.MarshalIndent(mcpmanifest.Manifest(), "", "  ")
+	params, err := parseCallParams(args[1:])
+	if err != nil {
+		fmt.Fprintf(stderr, "parse call params: %v\n", err)
+		return 2
+	}
+	result := mcpadapter.Call(context.Background(), toolName, params)
+	encoded, _ := json.MarshalIndent(result, "", "  ")
 	fmt.Fprintln(stdout, string(encoded))
+	if !result.OK {
+		return 1
+	}
 	return 0
 }
 
@@ -426,6 +451,67 @@ func splitCommandArgs(args []string) ([]string, []string) {
 		}
 	}
 	return args, nil
+}
+
+func parseCallParams(args []string) (map[string]any, error) {
+	params := map[string]any{}
+	for i := 0; i < len(args); i++ {
+		arg := args[i]
+		switch arg {
+		case "--param", "-p":
+			if i+1 >= len(args) {
+				return nil, fmt.Errorf("%s requires key=value", arg)
+			}
+			key, value, err := splitParam(args[i+1])
+			if err != nil {
+				return nil, err
+			}
+			params[key] = parseScalarValue(value)
+			i++
+		case "--json":
+			if i+1 >= len(args) {
+				return nil, fmt.Errorf("--json requires an object")
+			}
+			var raw map[string]any
+			dec := json.NewDecoder(strings.NewReader(args[i+1]))
+			dec.UseNumber()
+			if err := dec.Decode(&raw); err != nil {
+				return nil, fmt.Errorf("parse json params: %w", err)
+			}
+			for key, value := range raw {
+				params[key] = value
+			}
+			i++
+		default:
+			return nil, fmt.Errorf("unknown mcp call flag %q", arg)
+		}
+	}
+	return params, nil
+}
+
+func splitParam(raw string) (string, string, error) {
+	parts := strings.SplitN(raw, "=", 2)
+	if len(parts) != 2 || strings.TrimSpace(parts[0]) == "" {
+		return "", "", fmt.Errorf("invalid param %q, expected key=value", raw)
+	}
+	return strings.TrimSpace(parts[0]), parts[1], nil
+}
+
+func parseScalarValue(raw string) any {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return ""
+	}
+	if i, err := strconv.Atoi(raw); err == nil {
+		return i
+	}
+	if f, err := strconv.ParseFloat(raw, 64); err == nil {
+		return f
+	}
+	if b, err := strconv.ParseBool(raw); err == nil {
+		return b
+	}
+	return raw
 }
 
 func parseOptionalIntFlag(flags map[string]string, key string, stderr io.Writer) (int, bool) {

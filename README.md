@@ -11,6 +11,7 @@ ralphglasses system:
 - build review-only provider launch plans without starting child processes
 - build review-only loop plans with verification gates and stop conditions
 - run explicit no-shell local processes with timeout and capped output
+- call public MCP-style tools in process through a small adapter
 - validate and record planned provider sessions
 - keep local session state in simple JSONL files
 - publish a tiny MCP-style command manifest
@@ -68,6 +69,9 @@ go run . session list
 
 # Emit the public MCP-style tool manifest.
 go run . mcp manifest
+
+# Call a public MCP-style tool in process.
+go run . mcp call open_ralph_budget_estimate --param provider=codex --param input_tokens=1000 --param output_tokens=500
 
 # Scan a workspace for Git repos and .open-ralphrc opt-in files.
 go run . repos scan --root . --depth 3

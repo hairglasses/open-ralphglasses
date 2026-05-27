@@ -17,6 +17,7 @@ go run . loop plan --repo . --goal "Improve tests" --provider codex --verify "go
 go run . process run --repo . --timeout-seconds 10 -- go version
 go run . session start --provider codex --repo . --prompt "Inspect this repository"
 go run . session list
+go run . mcp call open_ralph_provider_list
 go run . repos scan --root . --depth 3
 ```
 
@@ -26,6 +27,8 @@ git so local prompts and repo paths stay local.
 ## Next Steps
 
 - Use `go run . mcp manifest` to inspect the public command surface.
+- Use `go run . mcp call` to exercise public tool dispatch without starting a
+  full MCP transport.
 - Use `go run . budget estimate` when you want a local, JSON-readable cost
   estimate before wiring real process execution.
 - Use `go run . hook check` to review whether a proposed tool action should be

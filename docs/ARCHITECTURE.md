@@ -9,6 +9,7 @@
 | `internal/hookgate` | Public allow/warn/block decisions for proposed hook actions. |
 | `internal/launchplan` | Review-only provider CLI command planning. |
 | `internal/loopplan` | Review-only iterative work plans with verification gates. |
+| `internal/mcpadapter` | In-process dispatch for public MCP-style tool names. |
 | `internal/processrun` | Explicit no-shell process execution with timeout and capped output. |
 | `internal/session` | Durable JSONL session planning ledger. |
 | `internal/events` | Bounded in-memory event history for adapters. |

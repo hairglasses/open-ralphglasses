@@ -16,6 +16,11 @@ type Tool struct {
 func Manifest() []Tool {
 	return []Tool{
 		{
+			Name:        "open_ralph_tool_manifest",
+			Description: "Return the public MCP-style tool manifest",
+			ReadOnly:    true,
+		},
+		{
 			Name:        "open_ralph_doctor",
 			Description: "Check provider executables and public state directory readiness",
 			ReadOnly:    true,
@@ -59,12 +64,13 @@ func Manifest() []Tool {
 			Name:        "open_ralph_session_plan",
 			Description: "Validate and record a planned provider session",
 			ReadOnly:    false,
-			Inputs:      []string{"provider", "repo", "prompt"},
+			Inputs:      []string{"provider", "repo", "prompt", "record", "root"},
 		},
 		{
 			Name:        "open_ralph_session_list",
 			Description: "List planned sessions from the local JSONL ledger",
 			ReadOnly:    true,
+			Inputs:      []string{"root"},
 		},
 		{
 			Name:        "open_ralph_repo_scan",

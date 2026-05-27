@@ -135,6 +135,25 @@ func TestRunMCPManifest(t *testing.T) {
 	}
 }
 
+func TestRunMCPCall(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	code := Run([]string{
+		"mcp", "call", "open_ralph_budget_estimate",
+		"--param", "provider=codex",
+		"--param", "input_tokens=1000",
+		"--param", "output_tokens=500",
+	}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("code=%d stderr=%s", code, stderr.String())
+	}
+	output := stdout.String()
+	for _, want := range []string{`"ok": true`, `"tool": "open_ralph_budget_estimate"`, `"estimate"`} {
+		if !strings.Contains(output, want) {
+			t.Fatalf("mcp call output missing %q: %s", want, output)
+		}
+	}
+}
+
 func TestRunReposScan(t *testing.T) {
 	root := t.TempDir()
 	repo := filepath.Join(root, "example")
