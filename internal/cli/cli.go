@@ -14,6 +14,7 @@ import (
 
 	"github.com/hairglasses/open-ralphglasses/internal/budget"
 	"github.com/hairglasses/open-ralphglasses/internal/discovery"
+	"github.com/hairglasses/open-ralphglasses/internal/hookgate"
 	"github.com/hairglasses/open-ralphglasses/internal/launchplan"
 	"github.com/hairglasses/open-ralphglasses/internal/mcpmanifest"
 	"github.com/hairglasses/open-ralphglasses/internal/provider"
@@ -40,6 +41,8 @@ func Run(args []string, stdout, stderr io.Writer) int {
 		return runBudget(args[1:], stdout, stderr)
 	case "doctor":
 		return runDoctor(stdout)
+	case "hook":
+		return runHook(args[1:], stdout, stderr)
 	case "launch":
 		return runLaunch(args[1:], stdout, stderr)
 	case "providers":
@@ -66,6 +69,7 @@ Usage:
   open-ralphglasses doctor
   open-ralphglasses providers
   open-ralphglasses budget estimate --provider codex --input-tokens 1000 --output-tokens 500
+  open-ralphglasses hook check --event PreToolUse --tool Bash --input "git status"
   open-ralphglasses launch plan --provider codex --repo . --prompt "Summarize this repo"
   open-ralphglasses session start --provider codex --repo . --prompt "Summarize this repo"
   open-ralphglasses session list
@@ -89,6 +93,35 @@ func runProviders(stdout io.Writer) int {
 		fmt.Fprintf(tw, "%s\t%s\t%s\t%s\t%s\n", p.ID, p.DisplayName, p.Command, p.DefaultModel, p.Notes)
 	}
 	_ = tw.Flush()
+	return 0
+}
+
+func runHook(args []string, stdout, stderr io.Writer) int {
+	if len(args) == 0 || args[0] != "check" {
+		fmt.Fprintln(stderr, "usage: open-ralphglasses hook check --event PreToolUse --tool Bash --input \"git status\" [--repo . --path file]")
+		return 2
+	}
+	flags := parseFlags(args[1:])
+	command := flags["input"]
+	if command == "" {
+		command = flags["command"]
+	}
+	decision, err := hookgate.Check(hookgate.CheckInput{
+		Event:    flags["event"],
+		Tool:     flags["tool"],
+		Command:  command,
+		Path:     flags["path"],
+		RepoPath: flags["repo"],
+	})
+	if err != nil {
+		fmt.Fprintf(stderr, "check hook: %v\n", err)
+		return 2
+	}
+	encoded, _ := json.MarshalIndent(decision, "", "  ")
+	fmt.Fprintln(stdout, string(encoded))
+	if decision.Verdict == hookgate.VerdictBlock {
+		return 1
+	}
 	return 0
 }
 

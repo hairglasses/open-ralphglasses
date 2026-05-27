@@ -8,6 +8,7 @@ export GOWORK=off
 
 go test ./...
 go run . budget estimate --provider codex --input-tokens 1000 --output-tokens 500 >/dev/null
+go run . hook check --event PreToolUse --tool Bash --input "git status --short" >/dev/null
 go run . launch plan --provider codex --repo . --prompt "Summarize this repository" --permission-mode read-only >/dev/null
 go run . providers >/dev/null
 go run . doctor >/dev/null

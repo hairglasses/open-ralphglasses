@@ -32,6 +32,12 @@ func Manifest() []Tool {
 			Inputs:      []string{"provider", "input_tokens", "output_tokens", "budget", "spent"},
 		},
 		{
+			Name:        "open_ralph_hook_check",
+			Description: "Evaluate a public hook-gate decision for a proposed tool action",
+			ReadOnly:    true,
+			Inputs:      []string{"event", "tool", "input", "command", "repo", "path"},
+		},
+		{
 			Name:        "open_ralph_launch_plan",
 			Description: "Build a review-only provider CLI command plan without executing it",
 			ReadOnly:    true,

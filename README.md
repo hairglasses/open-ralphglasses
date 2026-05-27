@@ -7,6 +7,7 @@ ralphglasses system:
 
 - normalize multiple agent providers behind one small catalog
 - estimate provider token cost and simple budget headroom
+- evaluate public hook-gate decisions for proposed tool actions
 - build review-only provider launch plans without starting child processes
 - validate and record planned provider sessions
 - keep local session state in simple JSONL files
@@ -44,6 +45,9 @@ go run . providers
 
 # Estimate token cost and optional budget headroom.
 go run . budget estimate --provider codex --input-tokens 1000 --output-tokens 500 --budget 1 --spent 0.25
+
+# Evaluate a proposed hook action without executing hooks.
+go run . hook check --event PreToolUse --tool Bash --input "git status --short"
 
 # Build an inspectable provider command plan without executing it.
 go run . launch plan --provider codex --repo . --prompt "Summarize this repository" --permission-mode read-only

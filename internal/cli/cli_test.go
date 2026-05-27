@@ -60,6 +60,25 @@ func TestRunLaunchPlan(t *testing.T) {
 	}
 }
 
+func TestRunHookCheck(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	code := Run([]string{
+		"hook", "check",
+		"--event", "PreToolUse",
+		"--tool", "Bash",
+		"--input", "git status --short",
+	}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("code=%d stderr=%s", code, stderr.String())
+	}
+	output := stdout.String()
+	for _, want := range []string{`"event": "PreToolUse"`, `"tool": "Bash"`, `"verdict": "allow"`} {
+		if !strings.Contains(output, want) {
+			t.Fatalf("hook output missing %q: %s", want, output)
+		}
+	}
+}
+
 func TestRunMCPManifest(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	code := Run([]string{"mcp", "manifest"}, &stdout, &stderr)

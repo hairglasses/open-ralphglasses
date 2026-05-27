@@ -6,6 +6,7 @@
 |---|---|
 | `internal/provider` | Provider catalog and validation. |
 | `internal/budget` | Public cost estimates and budget headroom checks. |
+| `internal/hookgate` | Public allow/warn/block decisions for proposed hook actions. |
 | `internal/launchplan` | Review-only provider CLI command planning. |
 | `internal/session` | Durable JSONL session planning ledger. |
 | `internal/events` | Bounded in-memory event history for adapters. |
@@ -23,7 +24,7 @@ they belong in this repository.
 
 1. CLI parses public command flags.
 2. `internal/provider` validates the provider id.
-3. Command packages normalize repo, prompt, discovery, or path metadata.
+3. Command packages normalize repo, prompt, hook, discovery, or path metadata.
 4. `internal/session.Store` appends session plans under `.open-ralph/` when the
    session command is used.
 5. Future TUI, MCP, or HTTP adapters can read the same public package outputs.
