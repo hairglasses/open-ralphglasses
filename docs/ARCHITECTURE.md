@@ -6,6 +6,7 @@
 |---|---|
 | `internal/provider` | Provider catalog and validation. |
 | `internal/budget` | Public cost estimates and budget headroom checks. |
+| `internal/launchplan` | Review-only provider CLI command planning. |
 | `internal/session` | Durable JSONL session planning ledger. |
 | `internal/events` | Bounded in-memory event history for adapters. |
 | `internal/discovery` | Public workspace scan over Git repos and `.open-ralphrc` opt-in files. |
@@ -32,6 +33,8 @@ they belong in this repository.
 - Add a provider by extending `provider.Catalog`.
 - Add provider pricing by passing explicit rates into `internal/budget` instead
   of treating example rates as current billing truth.
+- Add process execution only above `internal/launchplan`, after deciding how the
+  caller will review environment and permission policy.
 - Add a command by wiring a package function in `internal/cli`.
 - Add MCP transport by adapting `mcpmanifest.Manifest`.
 - Add repo metadata by teaching `internal/discovery` about another explicit,

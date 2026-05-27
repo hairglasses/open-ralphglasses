@@ -40,6 +40,26 @@ func TestRunBudgetEstimate(t *testing.T) {
 	}
 }
 
+func TestRunLaunchPlan(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	code := Run([]string{
+		"launch", "plan",
+		"--provider", "codex",
+		"--repo", ".",
+		"--prompt", "summarize",
+		"--permission-mode", "read-only",
+	}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("code=%d stderr=%s", code, stderr.String())
+	}
+	output := stdout.String()
+	for _, want := range []string{`"provider": "codex"`, `"execution_status": "planned_only"`, `"--sandbox"`} {
+		if !strings.Contains(output, want) {
+			t.Fatalf("launch plan output missing %q: %s", want, output)
+		}
+	}
+}
+
 func TestRunMCPManifest(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	code := Run([]string{"mcp", "manifest"}, &stdout, &stderr)

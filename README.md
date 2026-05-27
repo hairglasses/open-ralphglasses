@@ -7,6 +7,7 @@ ralphglasses system:
 
 - normalize multiple agent providers behind one small catalog
 - estimate provider token cost and simple budget headroom
+- build review-only provider launch plans without starting child processes
 - validate and record planned provider sessions
 - keep local session state in simple JSONL files
 - publish a tiny MCP-style command manifest
@@ -43,6 +44,9 @@ go run . providers
 
 # Estimate token cost and optional budget headroom.
 go run . budget estimate --provider codex --input-tokens 1000 --output-tokens 500 --budget 1 --spent 0.25
+
+# Build an inspectable provider command plan without executing it.
+go run . launch plan --provider codex --repo . --prompt "Summarize this repository" --permission-mode read-only
 
 # Record a planned session without launching a child process.
 go run . session start --provider codex --repo . --prompt "Summarize this repository"

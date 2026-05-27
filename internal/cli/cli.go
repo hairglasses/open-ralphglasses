@@ -14,6 +14,7 @@ import (
 
 	"github.com/hairglasses/open-ralphglasses/internal/budget"
 	"github.com/hairglasses/open-ralphglasses/internal/discovery"
+	"github.com/hairglasses/open-ralphglasses/internal/launchplan"
 	"github.com/hairglasses/open-ralphglasses/internal/mcpmanifest"
 	"github.com/hairglasses/open-ralphglasses/internal/provider"
 	"github.com/hairglasses/open-ralphglasses/internal/session"
@@ -39,6 +40,8 @@ func Run(args []string, stdout, stderr io.Writer) int {
 		return runBudget(args[1:], stdout, stderr)
 	case "doctor":
 		return runDoctor(stdout)
+	case "launch":
+		return runLaunch(args[1:], stdout, stderr)
 	case "providers":
 		return runProviders(stdout)
 	case "session":
@@ -63,6 +66,7 @@ Usage:
   open-ralphglasses doctor
   open-ralphglasses providers
   open-ralphglasses budget estimate --provider codex --input-tokens 1000 --output-tokens 500
+  open-ralphglasses launch plan --provider codex --repo . --prompt "Summarize this repo"
   open-ralphglasses session start --provider codex --repo . --prompt "Summarize this repo"
   open-ralphglasses session list
   open-ralphglasses mcp manifest
@@ -137,6 +141,39 @@ func runBudget(args []string, stdout, stderr io.Writer) int {
 		result["status"] = status
 	}
 	encoded, _ := json.MarshalIndent(result, "", "  ")
+	fmt.Fprintln(stdout, string(encoded))
+	return 0
+}
+
+func runLaunch(args []string, stdout, stderr io.Writer) int {
+	if len(args) == 0 || args[0] != "plan" {
+		fmt.Fprintln(stderr, "usage: open-ralphglasses launch plan --provider codex --repo . --prompt \"Summarize this repo\"")
+		return 2
+	}
+	flags := parseFlags(args[1:])
+	maxTurns, ok := parseOptionalIntFlag(flags, "max-turns", stderr)
+	if !ok {
+		return 2
+	}
+	budgetUSD, ok := parseOptionalFloatFlag(flags, "budget", stderr)
+	if !ok {
+		return 2
+	}
+	plan, err := launchplan.Build(launchplan.Options{
+		Provider:       flags["provider"],
+		RepoPath:       flags["repo"],
+		Prompt:         flags["prompt"],
+		Model:          flags["model"],
+		PermissionMode: flags["permission-mode"],
+		MaxTurns:       maxTurns,
+		BudgetUSD:      budgetUSD,
+		Agent:          flags["agent"],
+	})
+	if err != nil {
+		fmt.Fprintf(stderr, "plan launch: %v\n", err)
+		return 2
+	}
+	encoded, _ := json.MarshalIndent(plan, "", "  ")
 	fmt.Fprintln(stdout, string(encoded))
 	return 0
 }

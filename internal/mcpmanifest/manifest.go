@@ -32,6 +32,12 @@ func Manifest() []Tool {
 			Inputs:      []string{"provider", "input_tokens", "output_tokens", "budget", "spent"},
 		},
 		{
+			Name:        "open_ralph_launch_plan",
+			Description: "Build a review-only provider CLI command plan without executing it",
+			ReadOnly:    true,
+			Inputs:      []string{"provider", "repo", "prompt", "model", "permission_mode", "budget", "max_turns"},
+		},
+		{
 			Name:        "open_ralph_session_plan",
 			Description: "Validate and record a planned provider session",
 			ReadOnly:    false,
