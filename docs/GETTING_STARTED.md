@@ -28,4 +28,6 @@ go run . mcp call open_ralph_provider_list
   executing anything elsewhere.
 - Use `go run . loop plan` to describe bounded implementation iterations,
   verification gates, and stop conditions.
+- Read `docs/EXAMPLES.md` for public-safe output examples.
+- Read `docs/PUBLIC_BOUNDARY.md` before adding new surfaces.
 - Read `docs/ARCHITECTURE.md` before adding new planning or transport code.

@@ -66,3 +66,9 @@ go run . mcp call open_ralph_budget_estimate --param provider=codex --param inpu
 make smoke
 gitleaks detect --source . --no-git --redact
 ```
+
+## Public Surface
+
+- `docs/EXAMPLES.md` shows public-safe output shapes.
+- `docs/PUBLIC_BOUNDARY.md` documents what is intentionally included and
+  excluded from this reduced public seed.
