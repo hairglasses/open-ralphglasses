@@ -2,14 +2,17 @@
 package cli
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"text/tabwriter"
 
+	"github.com/hairglasses/open-ralphglasses/internal/discovery"
 	"github.com/hairglasses/open-ralphglasses/internal/mcpmanifest"
 	"github.com/hairglasses/open-ralphglasses/internal/provider"
 	"github.com/hairglasses/open-ralphglasses/internal/session"
@@ -39,6 +42,8 @@ func Run(args []string, stdout, stderr io.Writer) int {
 		return runSession(args[1:], stdout, stderr)
 	case "mcp":
 		return runMCP(args[1:], stdout, stderr)
+	case "repos":
+		return runRepos(args[1:], stdout, stderr)
 	case "worktree":
 		return runWorktree(args[1:], stdout, stderr)
 	default:
@@ -57,6 +62,7 @@ Usage:
   open-ralphglasses session start --provider codex --repo . --prompt "Summarize this repo"
   open-ralphglasses session list
   open-ralphglasses mcp manifest
+  open-ralphglasses repos scan --root . --depth 3
   open-ralphglasses worktree path --repo example --label refactor-api`)
 }
 
@@ -128,6 +134,35 @@ func runMCP(args []string, stdout, stderr io.Writer) int {
 		return 2
 	}
 	encoded, _ := json.MarshalIndent(mcpmanifest.Manifest(), "", "  ")
+	fmt.Fprintln(stdout, string(encoded))
+	return 0
+}
+
+func runRepos(args []string, stdout, stderr io.Writer) int {
+	if len(args) == 0 || args[0] != "scan" {
+		fmt.Fprintln(stderr, "usage: open-ralphglasses repos scan --root . --depth 3")
+		return 2
+	}
+	flags := parseFlags(args[1:])
+	root := flags["root"]
+	if root == "" {
+		root = "."
+	}
+	depth := 3
+	if flags["depth"] != "" {
+		parsed, err := strconv.Atoi(flags["depth"])
+		if err != nil || parsed < 1 {
+			fmt.Fprintf(stderr, "invalid depth %q\n", flags["depth"])
+			return 2
+		}
+		depth = parsed
+	}
+	repos, err := discovery.Scan(context.Background(), root, depth)
+	if err != nil {
+		fmt.Fprintf(stderr, "scan repos: %v\n", err)
+		return 1
+	}
+	encoded, _ := json.MarshalIndent(repos, "", "  ")
 	fmt.Fprintln(stdout, string(encoded))
 	return 0
 }

@@ -12,6 +12,7 @@ go test ./...
 go run . doctor
 go run . session start --provider codex --repo . --prompt "Inspect this repository"
 go run . session list
+go run . repos scan --root . --depth 3
 ```
 
 The session command writes `.open-ralph/sessions.jsonl`. That path is ignored by
@@ -20,7 +21,8 @@ git so local prompts and repo paths stay local.
 ## Next Steps
 
 - Use `go run . mcp manifest` to inspect the public command surface.
+- Add `.open-ralphrc` to example repositories you want surfaced as enabled by
+  `go run . repos scan`.
 - Use `go run . worktree path --repo my-service --label add-tests` to preview
   where a managed worktree would live.
 - Read `docs/ARCHITECTURE.md` before adding launch or transport code.
-

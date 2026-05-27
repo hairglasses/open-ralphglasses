@@ -9,6 +9,7 @@ ralphglasses system:
 - validate and record planned provider sessions
 - keep local session state in simple JSONL files
 - publish a tiny MCP-style command manifest
+- scan Git workspaces for explicit public opt-in markers
 - compute deterministic managed worktree paths
 
 It intentionally does not include private automation, credential routing,
@@ -48,6 +49,9 @@ go run . session list
 # Emit the public MCP-style tool manifest.
 go run . mcp manifest
 
+# Scan a workspace for Git repos and .open-ralphrc opt-in files.
+go run . repos scan --root . --depth 3
+
 # Compute a deterministic managed worktree path.
 go run . worktree path --repo example-service --label refactor-api
 ```
@@ -61,7 +65,6 @@ designed to be inspectable, example-driven, and free of private references.
 ## Development
 
 ```bash
-go test ./...
+make smoke
 gitleaks detect --source . --no-git --redact
 ```
-

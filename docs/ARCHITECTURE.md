@@ -7,6 +7,7 @@
 | `internal/provider` | Provider catalog and validation. |
 | `internal/session` | Durable JSONL session planning ledger. |
 | `internal/events` | Bounded in-memory event history for adapters. |
+| `internal/discovery` | Public workspace scan over Git repos and `.open-ralphrc` opt-in files. |
 | `internal/worktree` | Deterministic managed worktree path planning. |
 | `internal/mcpmanifest` | Machine-readable public command manifest. |
 | `internal/cli` | Thin command routing over the packages above. |
@@ -20,15 +21,17 @@ they belong in this repository.
 
 1. CLI parses public command flags.
 2. `internal/provider` validates the provider id.
-3. `internal/session` normalizes repo and prompt metadata.
-4. `internal/session.Store` appends a JSONL record under `.open-ralph/`.
-5. Future TUI, MCP, or HTTP adapters can read the same session ledger.
+3. Command packages normalize repo, prompt, discovery, or path metadata.
+4. `internal/session.Store` appends session plans under `.open-ralph/` when the
+   session command is used.
+5. Future TUI, MCP, or HTTP adapters can read the same public package outputs.
 
 ## Extension Points
 
 - Add a provider by extending `provider.Catalog`.
 - Add a command by wiring a package function in `internal/cli`.
 - Add MCP transport by adapting `mcpmanifest.Manifest`.
+- Add repo metadata by teaching `internal/discovery` about another explicit,
+  public-safe marker file.
 - Add real launches by building an explicit process package above
   `session.New`, with tests for command construction and cancellation.
-

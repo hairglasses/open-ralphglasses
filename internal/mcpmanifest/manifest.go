@@ -37,6 +37,12 @@ func Manifest() []Tool {
 			ReadOnly:    true,
 		},
 		{
+			Name:        "open_ralph_repo_scan",
+			Description: "Scan a workspace for Git repos and explicit public opt-in markers",
+			ReadOnly:    true,
+			Inputs:      []string{"root", "depth"},
+		},
+		{
 			Name:        "open_ralph_worktree_path",
 			Description: "Compute a deterministic managed worktree path",
 			ReadOnly:    true,
