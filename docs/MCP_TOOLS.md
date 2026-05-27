@@ -16,6 +16,9 @@ Current public tools:
 - `open_ralph_loop_plan`
 - `open_ralph_session_plan`
 - `open_ralph_session_list`
+- `open_ralph_session_inspect`
+- `open_ralph_session_analyze`
+- `open_ralph_session_replay_text`
 - `open_ralph_repo_scan`
 - `open_ralph_worktree_path`
 

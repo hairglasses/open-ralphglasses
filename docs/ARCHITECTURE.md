@@ -6,12 +6,14 @@
 |---|---|
 | `internal/provider` | Provider catalog and validation. |
 | `internal/budget` | Public cost estimates and budget headroom checks. |
+| `internal/chatevents` | Provider-neutral transcript event schema. |
 | `internal/hookgate` | Public allow/warn/block decisions for proposed hook actions. |
 | `internal/launchplan` | Review-only provider CLI command planning. |
 | `internal/loopplan` | Review-only iterative work plans with verification gates. |
 | `internal/mcpadapter` | In-process dispatch for public MCP-style tool names. |
 | `internal/processrun` | Explicit no-shell process execution with timeout and capped output. |
 | `internal/session` | Durable JSONL session planning ledger. |
+| `internal/sessionlog` | Durable transcript artifacts, analysis, and replay text. |
 | `internal/events` | Bounded in-memory event history for adapters. |
 | `internal/discovery` | Public workspace scan over Git repos and `.open-ralphrc` opt-in files. |
 | `internal/worktree` | Deterministic managed worktree path planning. |

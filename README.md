@@ -13,6 +13,7 @@ ralphglasses system:
 - run explicit no-shell local processes with timeout and capped output
 - call public MCP-style tools in process through a small adapter
 - validate and record planned provider sessions
+- inspect provider-neutral session transcripts without launching providers
 - keep local session state in simple JSONL files
 - publish a tiny MCP-style command manifest
 - scan Git workspaces for explicit public opt-in markers
@@ -66,6 +67,10 @@ go run . session start --provider codex --repo . --prompt "Summarize this reposi
 
 # Read planned sessions from .open-ralph/sessions.jsonl.
 go run . session list
+
+# Inspect a persisted provider-neutral transcript.
+go run . session analyze --id sess-example
+go run . session replay-text --id sess-example
 
 # Emit the public MCP-style tool manifest.
 go run . mcp manifest

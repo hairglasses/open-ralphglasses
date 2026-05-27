@@ -7,6 +7,10 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
+
+	"github.com/hairglasses/open-ralphglasses/internal/chatevents"
+	"github.com/hairglasses/open-ralphglasses/internal/sessionlog"
 )
 
 func TestRunProviders(t *testing.T) {
@@ -151,6 +155,29 @@ func TestRunMCPCall(t *testing.T) {
 		if !strings.Contains(output, want) {
 			t.Fatalf("mcp call output missing %q: %s", want, output)
 		}
+	}
+}
+
+func TestRunSessionAnalyzeTranscript(t *testing.T) {
+	root := t.TempDir()
+	now := time.Date(2026, 5, 27, 1, 2, 3, 0, time.UTC)
+	err := (sessionlog.Store{Root: root}).Save(sessionlog.PersistedSession{
+		Snapshot: sessionlog.Snapshot{ID: "sess-example", ProviderSessionID: "provider-session"},
+		Transcript: []chatevents.Event{
+			{Kind: chatevents.KindOperatorMessage, Text: "Inspect", At: now},
+			{Kind: chatevents.KindDelta, Channel: chatevents.ChannelText, Text: "Done", At: now.Add(time.Second)},
+		},
+	})
+	if err != nil {
+		t.Fatalf("save transcript: %v", err)
+	}
+	var stdout, stderr bytes.Buffer
+	code := Run([]string{"session", "analyze", "--root", root, "--id", "sess-example"}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("code=%d stderr=%s", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), `"replay_ready": true`) {
+		t.Fatalf("analysis output: %s", stdout.String())
 	}
 }
 

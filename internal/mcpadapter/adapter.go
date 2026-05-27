@@ -24,6 +24,7 @@ import (
 	"github.com/hairglasses/open-ralphglasses/internal/processrun"
 	"github.com/hairglasses/open-ralphglasses/internal/provider"
 	"github.com/hairglasses/open-ralphglasses/internal/session"
+	"github.com/hairglasses/open-ralphglasses/internal/sessionlog"
 	"github.com/hairglasses/open-ralphglasses/internal/worktree"
 )
 
@@ -158,6 +159,20 @@ func callPayload(ctx context.Context, toolName string, params map[string]any) (a
 		return sess, nil
 	case "open_ralph_session_list":
 		return (session.Store{Root: firstNonEmpty(stringParam(params, "root"), ".")}).List()
+	case "open_ralph_session_inspect":
+		return transcriptStore(params).Load(stringParam(params, "id"))
+	case "open_ralph_session_analyze":
+		ps, err := transcriptStore(params).Load(stringParam(params, "id"))
+		if err != nil {
+			return nil, err
+		}
+		return sessionlog.Analyze(ps), nil
+	case "open_ralph_session_replay_text":
+		ps, err := transcriptStore(params).Load(stringParam(params, "id"))
+		if err != nil {
+			return nil, err
+		}
+		return map[string]string{"text": sessionlog.RenderReplayText(ps.Transcript)}, nil
 	case "open_ralph_repo_scan":
 		depth, err := intParam(params, "depth")
 		if err != nil {
@@ -177,6 +192,10 @@ func callPayload(ctx context.Context, toolName string, params map[string]any) (a
 	default:
 		return nil, fmt.Errorf("unknown public tool %q", toolName)
 	}
+}
+
+func transcriptStore(params map[string]any) sessionlog.Store {
+	return sessionlog.Store{Root: firstNonEmpty(stringParam(params, "root"), ".")}
 }
 
 func providerStatuses() []ProviderStatus {

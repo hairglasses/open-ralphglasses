@@ -23,6 +23,7 @@ import (
 	"github.com/hairglasses/open-ralphglasses/internal/processrun"
 	"github.com/hairglasses/open-ralphglasses/internal/provider"
 	"github.com/hairglasses/open-ralphglasses/internal/session"
+	"github.com/hairglasses/open-ralphglasses/internal/sessionlog"
 	"github.com/hairglasses/open-ralphglasses/internal/worktree"
 )
 
@@ -83,6 +84,7 @@ Usage:
   open-ralphglasses process run --repo . -- go version
   open-ralphglasses session start --provider codex --repo . --prompt "Summarize this repo"
   open-ralphglasses session list
+  open-ralphglasses session analyze --id sess-example
   open-ralphglasses mcp manifest
   open-ralphglasses mcp call open_ralph_provider_list
   open-ralphglasses repos scan --root . --depth 3
@@ -303,6 +305,12 @@ func runSession(args []string, stdout, stderr io.Writer) int {
 		encoded, _ := json.MarshalIndent(sessions, "", "  ")
 		fmt.Fprintln(stdout, string(encoded))
 		return 0
+	case "inspect":
+		return runSessionInspect(args[1:], stdout, stderr)
+	case "analyze":
+		return runSessionAnalyze(args[1:], stdout, stderr)
+	case "replay-text":
+		return runSessionReplayText(args[1:], stdout, stderr)
 	default:
 		fmt.Fprintf(stderr, "unknown session subcommand %q\n", args[0])
 		return 2
@@ -327,6 +335,49 @@ func runSessionStart(args []string, stdout, stderr io.Writer) int {
 	encoded, _ := json.MarshalIndent(sess, "", "  ")
 	fmt.Fprintln(stdout, string(encoded))
 	return 0
+}
+
+func runSessionInspect(args []string, stdout, stderr io.Writer) int {
+	flags := parseFlags(args)
+	ps, err := loadTranscriptFromFlags(flags)
+	if err != nil {
+		fmt.Fprintf(stderr, "inspect session: %v\n", err)
+		return 1
+	}
+	encoded, _ := json.MarshalIndent(ps, "", "  ")
+	fmt.Fprintln(stdout, string(encoded))
+	return 0
+}
+
+func runSessionAnalyze(args []string, stdout, stderr io.Writer) int {
+	flags := parseFlags(args)
+	ps, err := loadTranscriptFromFlags(flags)
+	if err != nil {
+		fmt.Fprintf(stderr, "analyze session: %v\n", err)
+		return 1
+	}
+	encoded, _ := json.MarshalIndent(sessionlog.Analyze(ps), "", "  ")
+	fmt.Fprintln(stdout, string(encoded))
+	return 0
+}
+
+func runSessionReplayText(args []string, stdout, stderr io.Writer) int {
+	flags := parseFlags(args)
+	ps, err := loadTranscriptFromFlags(flags)
+	if err != nil {
+		fmt.Fprintf(stderr, "replay session: %v\n", err)
+		return 1
+	}
+	fmt.Fprintln(stdout, sessionlog.RenderReplayText(ps.Transcript))
+	return 0
+}
+
+func loadTranscriptFromFlags(flags map[string]string) (sessionlog.PersistedSession, error) {
+	id := strings.TrimSpace(flags["id"])
+	if id == "" {
+		return sessionlog.PersistedSession{}, fmt.Errorf("--id is required")
+	}
+	return (sessionlog.Store{Root: flags["root"]}).Load(id)
 }
 
 func runMCP(args []string, stdout, stderr io.Writer) int {
