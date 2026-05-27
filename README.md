@@ -1,6 +1,12 @@
 # open-ralphglasses
 
+[![CI](https://github.com/hairglasses/open-ralphglasses/actions/workflows/ci.yml/badge.svg)](https://github.com/hairglasses/open-ralphglasses/actions/workflows/ci.yml)
+[![Go](https://img.shields.io/badge/Go-1.26+-00ADD8?logo=go&logoColor=white)](https://go.dev/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 Small Go CLI for planning multi-provider agent work.
+
+This is a sanitized public seed of a broader control-plane direction. It keeps the reusable planning, policy, and MCP-style contract surfaces while excluding account data, customer data, host details, and non-public research pipelines.
 
 The project focuses on reviewable planning primitives:
 

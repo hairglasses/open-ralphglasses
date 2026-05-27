@@ -1,0 +1,41 @@
+name: Bug report
+description: Report a reproducible problem in open-ralphglasses
+title: "bug: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a problem. Do not include credentials, account data, customer data, host details, or non-public workflow details.
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      description: Paste the release version, commit SHA, or `go version` context if relevant.
+      placeholder: "v0.0.0 or commit SHA"
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+      description: List the exact commands or steps needed to reproduce the issue.
+      placeholder: |
+        1. Run `go run . providers`
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Include sanitized logs or screenshots only if they do not expose private data.
