@@ -26,6 +26,12 @@ func Manifest() []Tool {
 			ReadOnly:    true,
 		},
 		{
+			Name:        "open_ralph_process_run",
+			Description: "Run one explicit no-shell process with timeout and capped output",
+			ReadOnly:    false,
+			Inputs:      []string{"repo", "timeout_seconds", "output_limit", "command"},
+		},
+		{
 			Name:        "open_ralph_budget_estimate",
 			Description: "Estimate provider token cost and evaluate optional budget headroom",
 			ReadOnly:    true,

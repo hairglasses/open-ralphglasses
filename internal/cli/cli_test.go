@@ -3,6 +3,7 @@ package cli
 import (
 	"bytes"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -96,6 +97,29 @@ func TestRunLoopPlan(t *testing.T) {
 	for _, want := range []string{`"goal": "add tests"`, `"provider": "codex"`, `"execution_status": "planned_only"`} {
 		if !strings.Contains(output, want) {
 			t.Fatalf("loop output missing %q: %s", want, output)
+		}
+	}
+}
+
+func TestRunProcessRun(t *testing.T) {
+	if _, err := exec.LookPath("go"); err != nil {
+		t.Skip("go executable not on PATH")
+	}
+	var stdout, stderr bytes.Buffer
+	code := Run([]string{
+		"process", "run",
+		"--repo", ".",
+		"--timeout-seconds", "5",
+		"--",
+		"go", "version",
+	}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("code=%d stderr=%s", code, stderr.String())
+	}
+	output := stdout.String()
+	for _, want := range []string{`"exit_code": 0`, `"timed_out": false`, "go version"} {
+		if !strings.Contains(output, want) {
+			t.Fatalf("process output missing %q: %s", want, output)
 		}
 	}
 }

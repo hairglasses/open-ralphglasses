@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"text/tabwriter"
+	"time"
 
 	"github.com/hairglasses/open-ralphglasses/internal/budget"
 	"github.com/hairglasses/open-ralphglasses/internal/discovery"
@@ -18,6 +19,7 @@ import (
 	"github.com/hairglasses/open-ralphglasses/internal/launchplan"
 	"github.com/hairglasses/open-ralphglasses/internal/loopplan"
 	"github.com/hairglasses/open-ralphglasses/internal/mcpmanifest"
+	"github.com/hairglasses/open-ralphglasses/internal/processrun"
 	"github.com/hairglasses/open-ralphglasses/internal/provider"
 	"github.com/hairglasses/open-ralphglasses/internal/session"
 	"github.com/hairglasses/open-ralphglasses/internal/worktree"
@@ -50,6 +52,8 @@ func Run(args []string, stdout, stderr io.Writer) int {
 		return runLoop(args[1:], stdout, stderr)
 	case "providers":
 		return runProviders(stdout)
+	case "process":
+		return runProcess(args[1:], stdout, stderr)
 	case "session":
 		return runSession(args[1:], stdout, stderr)
 	case "mcp":
@@ -75,6 +79,7 @@ Usage:
   open-ralphglasses hook check --event PreToolUse --tool Bash --input "git status"
   open-ralphglasses launch plan --provider codex --repo . --prompt "Summarize this repo"
   open-ralphglasses loop plan --repo . --goal "Add tests" --verify "go test ./..."
+  open-ralphglasses process run --repo . -- go version
   open-ralphglasses session start --provider codex --repo . --prompt "Summarize this repo"
   open-ralphglasses session list
   open-ralphglasses mcp manifest
@@ -241,6 +246,43 @@ func runLoop(args []string, stdout, stderr io.Writer) int {
 	return 0
 }
 
+func runProcess(args []string, stdout, stderr io.Writer) int {
+	if len(args) == 0 || args[0] != "run" {
+		fmt.Fprintln(stderr, "usage: open-ralphglasses process run --repo . [--timeout-seconds 30 --output-limit 65536] -- command arg")
+		return 2
+	}
+	flagArgs, command := splitCommandArgs(args[1:])
+	if len(command) == 0 {
+		fmt.Fprintln(stderr, "process command is required after --")
+		return 2
+	}
+	flags := parseFlags(flagArgs)
+	timeoutSeconds, ok := parseOptionalIntFlag(flags, "timeout-seconds", stderr)
+	if !ok {
+		return 2
+	}
+	outputLimit, ok := parseOptionalIntFlag(flags, "output-limit", stderr)
+	if !ok {
+		return 2
+	}
+	result, err := processrun.Run(context.Background(), processrun.Options{
+		RepoPath:    flags["repo"],
+		Command:     command,
+		Timeout:     time.Duration(timeoutSeconds) * time.Second,
+		OutputLimit: outputLimit,
+	})
+	if err != nil {
+		fmt.Fprintf(stderr, "run process: %v\n", err)
+		return 2
+	}
+	encoded, _ := json.MarshalIndent(result, "", "  ")
+	fmt.Fprintln(stdout, string(encoded))
+	if result.ExitCode != 0 {
+		return 1
+	}
+	return 0
+}
+
 func runSession(args []string, stdout, stderr io.Writer) int {
 	if len(args) == 0 {
 		fmt.Fprintln(stderr, "session subcommand is required: start or list")
@@ -375,6 +417,15 @@ func parseFlags(args []string) map[string]string {
 		}
 	}
 	return flags
+}
+
+func splitCommandArgs(args []string) ([]string, []string) {
+	for i, arg := range args {
+		if arg == "--" {
+			return args[:i], args[i+1:]
+		}
+	}
+	return args, nil
 }
 
 func parseOptionalIntFlag(flags map[string]string, key string, stderr io.Writer) (int, bool) {

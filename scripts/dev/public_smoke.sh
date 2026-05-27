@@ -14,6 +14,7 @@ go run . loop plan --repo . --goal "Improve docs" --provider codex --verify "go 
 go run . providers >/dev/null
 go run . doctor >/dev/null
 go run . mcp manifest >/dev/null
+go run . process run --repo . --timeout-seconds 10 -- go version >/dev/null
 go run . worktree path --repo example --label smoke >/dev/null
 go run . repos scan --root . >/dev/null
 

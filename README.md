@@ -10,6 +10,7 @@ ralphglasses system:
 - evaluate public hook-gate decisions for proposed tool actions
 - build review-only provider launch plans without starting child processes
 - build review-only loop plans with verification gates and stop conditions
+- run explicit no-shell local processes with timeout and capped output
 - validate and record planned provider sessions
 - keep local session state in simple JSONL files
 - publish a tiny MCP-style command manifest
@@ -55,6 +56,9 @@ go run . launch plan --provider codex --repo . --prompt "Summarize this reposito
 
 # Build an inspectable iterative work plan without executing it.
 go run . loop plan --repo . --goal "Improve tests" --provider codex --verify "go test ./..."
+
+# Run one explicit process without a shell.
+go run . process run --repo . --timeout-seconds 10 -- go version
 
 # Record a planned session without launching a child process.
 go run . session start --provider codex --repo . --prompt "Summarize this repository"
