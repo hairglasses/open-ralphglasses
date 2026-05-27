@@ -1,0 +1,19 @@
+# Public MCP-Style Manifest
+
+This repository does not ship a full MCP transport yet. It does ship a stable
+tool manifest so a future stdio or HTTP adapter can preserve the command names.
+
+Current public tools:
+
+- `open_ralph_doctor`
+- `open_ralph_provider_list`
+- `open_ralph_session_plan`
+- `open_ralph_session_list`
+- `open_ralph_worktree_path`
+
+Run:
+
+```bash
+go run . mcp manifest
+```
+
