@@ -24,6 +24,8 @@ jobs:
           go-version-file: go.mod
           cache: true
       - name: Install gitleaks
+        env:
+          GOTOOLCHAIN: auto
         run: go install github.com/zricethezav/gitleaks/v8@v8.30.1
       - name: Public smoke
         run: make smoke
