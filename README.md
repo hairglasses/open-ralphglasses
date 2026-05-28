@@ -1,7 +1,7 @@
 # open-ralphglasses
 
 [![CI](https://github.com/hairglasses/open-ralphglasses/actions/workflows/ci.yml/badge.svg)](https://github.com/hairglasses/open-ralphglasses/actions/workflows/ci.yml)
-[![Go](https://img.shields.io/badge/Go-1.26+-00ADD8?logo=go&logoColor=white)](https://go.dev/)
+[![Go](https://img.shields.io/badge/Go-1.23+-00ADD8?logo=go&logoColor=white)](https://go.dev/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 Small Go CLI for planning multi-provider agent work.
@@ -18,6 +18,14 @@ The project focuses on reviewable planning primitives:
 - expose the same core operations through a small MCP-style adapter
 
 ## Install
+
+Stable release:
+
+```bash
+go install github.com/hairglasses/open-ralphglasses@v0.1.0
+```
+
+Latest main:
 
 ```bash
 go install github.com/hairglasses/open-ralphglasses@latest
@@ -58,6 +66,84 @@ go run . mcp manifest
 
 # Call an MCP-style tool in process.
 go run . mcp call open_ralph_budget_estimate --param provider=codex --param input_tokens=1000 --param output_tokens=500
+```
+
+## Demo Output
+
+`open-ralphglasses` returns reviewable plans and checks; it does not execute
+provider agents or shell hooks.
+
+```text
+$ open-ralphglasses doctor
+provider  installed  command
+codex     true       codex
+claude    true       claude
+gemini    true       gemini
+```
+
+```json
+{
+  "provider": "codex",
+  "command": "codex",
+  "args": [
+    "exec",
+    "--model",
+    "gpt-5",
+    "--json",
+    "--sandbox",
+    "read-only",
+    "Summarize this repository"
+  ],
+  "repo_path": "/path/to/open-ralphglasses",
+  "permission_mode": "read-only",
+  "review_required": true,
+  "safety_notes": [
+    "command is not executed by open-ralphglasses",
+    "review args and environment policy before wiring a process runner"
+  ],
+  "execution_status": "planned_only"
+}
+```
+
+```json
+{
+  "goal": "Improve tests",
+  "repo_path": "/path/to/open-ralphglasses",
+  "provider": "codex",
+  "max_iterations": 3,
+  "verify_commands": [
+    "go test ./..."
+  ],
+  "review_required": true,
+  "execution_status": "planned_only",
+  "steps": [
+    {
+      "order": 1,
+      "name": "inspect",
+      "description": "read repo state, task context, and current diffs"
+    },
+    {
+      "order": 2,
+      "name": "plan_slice",
+      "description": "choose one bounded implementation slice"
+    },
+    {
+      "order": 3,
+      "name": "implement",
+      "description": "apply the smallest changes needed for the slice"
+    },
+    {
+      "order": 4,
+      "name": "verify",
+      "description": "run the configured verification command and capture output"
+    }
+  ],
+  "stop_conditions": [
+    "goal is satisfied",
+    "verification fails and requires human review",
+    "max_iterations is reached"
+  ]
+}
 ```
 
 ## Development
