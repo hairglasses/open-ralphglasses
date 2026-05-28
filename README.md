@@ -17,6 +17,16 @@ The project focuses on reviewable planning primitives:
 - build bounded loop plans with verification gates
 - expose the same core operations through a small MCP-style adapter
 
+## Start Here
+
+For a quick review path:
+
+1. Run the commands in [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md).
+2. Compare output shapes in [docs/EXAMPLES.md](docs/EXAMPLES.md).
+3. Review package boundaries in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+4. Check [docs/PUBLIC_BOUNDARY.md](docs/PUBLIC_BOUNDARY.md) before adding new
+   planning surfaces.
+
 ## Install
 
 Stable release:
@@ -36,7 +46,7 @@ From source:
 ```bash
 git clone https://github.com/hairglasses/open-ralphglasses.git
 cd open-ralphglasses
-go test ./...
+make test
 go run . providers
 ```
 
@@ -149,6 +159,7 @@ gemini    true       gemini
 ## Development
 
 ```bash
+make test
 make smoke
 gitleaks detect --source . --no-git --redact
 ```

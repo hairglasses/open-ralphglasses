@@ -8,7 +8,7 @@
 ## First Run
 
 ```bash
-go test ./...
+make test
 go run . doctor
 go run . providers
 go run . budget estimate --provider codex --input-tokens 1000 --output-tokens 500
