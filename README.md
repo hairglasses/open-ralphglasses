@@ -24,7 +24,9 @@ For a quick review path:
 1. Run the commands in [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md).
 2. Compare output shapes in [docs/EXAMPLES.md](docs/EXAMPLES.md).
 3. Review package boundaries in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
-4. Check [docs/PUBLIC_BOUNDARY.md](docs/PUBLIC_BOUNDARY.md) before adding new
+4. Use [docs/PORTFOLIO_PROOF.md](docs/PORTFOLIO_PROOF.md) for the architecture
+   diagram, walkthrough plan, tradeoffs, and interview prompts.
+5. Check [docs/PUBLIC_BOUNDARY.md](docs/PUBLIC_BOUNDARY.md) before adding new
    planning surfaces.
 
 ## Install
