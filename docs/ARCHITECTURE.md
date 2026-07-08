@@ -30,3 +30,16 @@
 - Add a planning command by wiring a package function in `internal/cli`.
 - Add transport support by adapting `mcpmanifest.Manifest` and
   `mcpadapter.Call`.
+
+## Relationship To The Broader System
+
+This repo intentionally stays small: a reviewable planning and policy layer
+with no live execution. Several of the harder, production-shaped problems
+this planning layer assumes have been solved are developed and published as
+their own standalone repos rather than folded back in here — see the
+README's "Extracted Components" section for the full list (`mcpkit`,
+`agentloop`, `provider-quota`, `leasequeue`, `mcp-gateway`,
+`worktree-isolate`, `syspressure`, `agent-consensus`, `provider-shim`,
+`browserctl`, `agent-patterns`, and the in-progress `durable-recovery` and
+`hook-runner`). Treat `open-ralphglasses` as the conceptual seed and those
+repos as the components that grew out of it, not as a single monolith.

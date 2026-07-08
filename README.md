@@ -171,3 +171,36 @@ gitleaks detect --source . --no-git --redact
 - `docs/EXAMPLES.md` shows public-safe output shapes.
 - `docs/PUBLIC_BOUNDARY.md` documents what is intentionally included and
   excluded from this reduced public seed.
+
+## Extracted Components
+
+`open-ralphglasses` is the seed CLI for a broader agent control-plane
+direction. Several of its underlying ideas have since grown into their own
+standalone, independently published Go projects — real, separately buildable
+repositories, not renames of this one:
+
+| Project | What it does |
+| --- | --- |
+| `mcpkit` | Production Go toolkit for MCP servers — middleware chains, RBAC, FinOps, circuit breakers. |
+| `agentloop` | Perpetual autonomous-agent control loop: a guarded FSM (Plan→Execute→Evaluate→Improve) with a threshold-driven budget enforcer. |
+| `provider-quota` | Parses LLM API rate-limit headers into a normalized `[0,1]` headroom signal, with a sliding-window fallback. |
+| `leasequeue` | Crash-safe two-phase reservation (lease) protocol with fencing tokens and TTL reaping for coordinating work across unreliable workers. |
+| `mcp-gateway` | Production-shaped JSON-RPC reverse-proxy gateway for MCP servers: composable audit→auth→rate-limit→route middleware chain with per-provider circuit breakers. |
+| `worktree-isolate` | Git worktree lifecycle for fleets of parallel agents: create/list/remove, squash-mergeback with conflict reporting, and collision-free per-branch port/DB/tmp allocation. |
+| `syspressure` | Cross-platform system pressure classifier (Low/Medium/High/Critical) over load, memory, disk, and goroutines. |
+| `agent-consensus` | A "quorum before an agent acts" governance primitive: content-addressed proposals, leader election on duplicate proposals, and timeout/dissent escalation. |
+| `provider-shim` | Normalizes Claude/Codex/Gemini behind one `Shim` interface and `Registry`, replacing switch-on-provider dispatch with a capability-matrix-driven strategy. |
+| `browserctl` | A native Chrome DevTools Protocol (CDP) reliability facade: endpoint canonicalization, wedge/config-drift detection, and remote re-routing for long-lived browser automation. |
+| `agent-patterns` | Composable Go primitives for coordinating multiple LLM agent sessions: role-based orchestration, a durable message queue, and hot/warm/cold shared memory. |
+
+Two more are in progress: `durable-recovery` (crash/interrupt recovery
+primitives) and `hook-runner` (the enforcement runtime that turns this repo's
+review-only `internal/hookgate` decisions into actual hook execution).
+
+This README intentionally does not link out to a specific hosting
+organization for those projects — this repo's own boundary check
+(`scripts/dev/public_smoke.sh`) treats the parent workspace's brand name as a
+forbidden marker, and that check takes precedence over adding convenience
+links. Each project name above is independently searchable on GitHub. Read
+`docs/PUBLIC_BOUNDARY.md` for how the "still excluded" surfaces here map onto
+those extracted projects.

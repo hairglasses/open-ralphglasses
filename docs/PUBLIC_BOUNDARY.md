@@ -18,9 +18,28 @@ assumptions.
 
 - Credentials, tokens, browser session data, and account exports.
 - Operator-specific paths, hostnames, caches, or machine bootstrap code.
-- Live provider process supervision or session recovery.
+- Live provider process supervision or session recovery. The production
+  crash/interrupt-recovery primitives for this are being extracted separately
+  as `durable-recovery` (in progress).
 - Repo discovery, worktree control, transcript parsing, or shell execution.
+  The worktree-lifecycle piece of this is already public and standalone as
+  `worktree-isolate`.
+- An interactive TUI/session viewer, and a real hook-execution runtime — this
+  repo's `internal/hookgate` only reviews and classifies proposed actions
+  (allow/warn/block); turning that into enforced, running hooks is a
+  separate, in-progress project (`hook-runner`).
+- A fuller MCP transport (stdio/HTTP servers, auth, rate limiting, routing)
+  instead of the in-process adapter here. `mcp-gateway` is the
+  production-shaped gateway this seed's MCP-style surface points toward.
 - Non-public research pipelines and generated provider overlays.
+
+See the README's "Extracted Components" section for the full list of
+standalone projects this system's ideas have grown into. That section
+deliberately omits hosting-organization links: this repo's boundary check
+(`scripts/dev/public_smoke.sh`) forbids the parent workspace's brand name
+appearing anywhere in this tree, and that check is authoritative — do not
+weaken it to add convenience links without an explicit, deliberate decision
+outside of routine doc edits.
 
 ## Publication Checks
 
