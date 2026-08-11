@@ -2,7 +2,7 @@
 
 > Canonical instructions: AGENTS.md
 
-This repo uses AGENTS.md as the canonical instruction file.
+This repo uses [AGENTS.md](AGENTS.md) as the canonical instruction file.
 
 ## What this is
 
