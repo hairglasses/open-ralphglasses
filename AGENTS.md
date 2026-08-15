@@ -53,8 +53,7 @@ those are separate repos, not renames of this one.
 
 ## Workspace context
 
-See `/home/hg/hairglasses-studio/CLAUDE.md` for shared multi-repo
-conventions. The private repo this mirrors is
-`/home/hg/hairglasses-studio/ralphglasses`. Do not sync private-repo
-internals here wholesale — only intentionally reduced, sanitized slices,
-reviewed against `docs/PUBLIC_BOUNDARY.md`.
+Shared workspace conventions live outside this public mirror. Canonical
+development happens in the private source repository; do not sync its
+internals here wholesale. Only import intentionally reduced, sanitized
+slices reviewed against `docs/PUBLIC_BOUNDARY.md`.

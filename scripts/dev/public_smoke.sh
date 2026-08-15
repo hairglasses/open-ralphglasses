@@ -39,7 +39,7 @@ for encoded in \
   YXJjaGdsYXNzZXM=
 do
   marker="$(printf '%s' "${encoded}" | base64 -d)"
-  if rg -n -i --fixed-strings --hidden --glob '!/.git/**' -- "${marker}" .; then
+  if git grep -n -i -F -- "${marker}"; then
     echo "public marker guard failed" >&2
     exit 1
   fi

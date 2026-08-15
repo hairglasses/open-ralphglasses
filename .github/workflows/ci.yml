@@ -1,8 +1,9 @@
 name: ci
 
+# Deprecated automation surface: local `make test` and `make smoke` are the
+# canonical gates. This compatibility workflow is intentionally manual-only.
 on:
-  push:
-  pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
