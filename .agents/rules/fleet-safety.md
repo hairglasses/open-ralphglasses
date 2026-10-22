@@ -3,7 +3,7 @@
 ## 1. Response & Code Standards
 - Response Style: Direct to the point, no summaries or preamble.
 - Code Style: Strict `gofmt`, follow existing patterns, no added docstrings, comments, or type annotations.
-- Git Commits: Always author commits as `Mitch <mitch@hairglasses.studio>`.
+- Git Commits: Always author commits as `Mitch <mitch@hairglasses.studio>`. Omit AI attribution and co-author credits, including AI session and generated-by/generated-with credits. Preserve existing history, licenses, and source provenance such as Reclaimed-From.
 
 ## 2. Non-Interactive Execution
 - Disable terminal pagination (`git --no-pager`) and redirect stdin from `/dev/null` on commands that might await input (`go test ./... < /dev/null`).
