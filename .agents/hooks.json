@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'root=\"$(git rev-parse --show-toplevel 2>/dev/null || echo ..)\"; if [ -x \"$root/scripts/hooks/pre-tool-guard.sh\" ]; then exec \"$root/scripts/hooks/pre-tool-guard.sh\"; elif [ -x \"$root/scripts/dev/agy-hook.sh\" ]; then exec \"$root/scripts/dev/agy-hook.sh\" pre-tool; elif [ -x \"$root/scripts/agy-hook.sh\" ]; then exec \"$root/scripts/agy-hook.sh\" PreToolUse; elif [ -x \"$root/bin/agy-hook-eval\" ]; then exec \"$root/bin/agy-hook-eval\"; else echo \"{\\\"decision\\\":\\\"allow\\\"}\"; fi'",
+            "command": "bash -c 'root=\"$(git rev-parse --show-toplevel 2>/dev/null || echo ..)\"; if [ -x \"$root/scripts/hooks/pre-tool-guard.sh\" ]; then exec \"$root/scripts/hooks/pre-tool-guard.sh\"; elif [ -x \"$root/scripts/dev/agy-hook.sh\" ]; then exec \"$root/scripts/dev/agy-hook.sh\" pre-tool; elif [ -x \"$root/scripts/agy-hook.sh\" ]; then exec \"$root/scripts/agy-hook.sh\" PreToolUse; elif [ -x \"$root/bin/agy-hook-eval\" ]; then exec \"$root/bin/agy-hook-eval\"; else echo \"{\\\"decision\\\":\\\"deny\\\",\\\"reason\\\":\\\"PreToolUse guard unavailable\\\"}\"; fi'",
             "timeout": 15
           }
         ]
@@ -41,7 +41,7 @@
     "Stop": [
       {
         "type": "command",
-        "command": "bash -c 'root=\"$(git rev-parse --show-toplevel 2>/dev/null || echo ..)\"; if [ -x \"$root/scripts/hooks/stop-guard.sh\" ]; then exec \"$root/scripts/hooks/stop-guard.sh\"; elif [ -x \"$root/scripts/agy-hook.sh\" ]; then exec \"$root/scripts/agy-hook.sh\" Stop; else echo \"{\\\"decision\\\":\\\"allow\\\"}\"; fi'",
+        "command": "bash -c 'root=\"$(git rev-parse --show-toplevel 2>/dev/null || echo ..)\"; if [ -x \"$root/scripts/hooks/stop-guard.sh\" ]; then exec \"$root/scripts/hooks/stop-guard.sh\"; elif [ -x \"$root/scripts/agy-hook.sh\" ]; then exec \"$root/scripts/agy-hook.sh\" Stop; else echo \"{\\\"decision\\\":\\\"continue\\\",\\\"status\\\":\\\"UNKNOWN\\\",\\\"reason\\\":\\\"Stop guard unavailable\\\"}\"; fi'",
         "timeout": 5
       }
     ]

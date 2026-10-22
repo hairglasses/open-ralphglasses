@@ -1,6 +1,7 @@
 ---
 name: agy-fleet-control
 description: Standardized AGY fleet management skill for managing multi-agent subagents, sync engine, and control plane workflows.
+model: opus
 ---
 
 # AGY Fleet Control Skill

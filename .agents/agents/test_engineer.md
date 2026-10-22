@@ -1,15 +1,13 @@
 ---
 name: test_engineer
 description: Continuous verification and test engineer writing comprehensive Go unit tests, benchmark suites, and integration tests.
-model: gemini-3.7-flash-high
-effort: high
-mode: accept-edits
+model: inherit
 mainAgent: false
 subagent: true
 hidden: false
 inheritCustomizations: true
 inheritMcp: true
-commandExecutionPolicy: unrestricted
+commandExecutionPolicy: eager
 rules:
   - rules/fleet-safety.md
 ---

@@ -1,15 +1,13 @@
 ---
 name: unification_architect
 description: Multi-repository codebase unification architect enforcing standard Go tooling, retiring bespoke shell scripts, and standardizing MCP contracts.
-model: gemini-3.1-pro-high
-effort: high
-mode: accept-edits
+model: inherit
 mainAgent: true
 subagent: true
 hidden: false
 inheritCustomizations: true
 inheritMcp: true
-commandExecutionPolicy: unrestricted
+commandExecutionPolicy: eager
 rules:
   - rules/fleet-safety.md
 ---
