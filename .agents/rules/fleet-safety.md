@@ -1,3 +1,8 @@
+---
+trigger: always_on
+description: "Fleet Safety Rules"
+---
+
 # Fleet Safety Rules
 
 ## 1. Response & Code Standards

@@ -8,9 +8,7 @@
   "context_window": 1048576,
   "max_output_tokens": 65536,
   "thinking": {
-    "level": "LOW",
-    "budget_tokens": 2048,
-    "temperature": 0.1
+    "level": "LOW"
   },
   "default_mode": "accept-edits",
   "timeout_seconds": 180,
