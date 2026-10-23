@@ -10,6 +10,18 @@ inheritMcp: true
 commandExecutionPolicy: eager
 rules:
   - rules/fleet-safety.md
+tools:
+  - send_message
+  - view_file
+  - read_url_content
+  - search_web
+  - schedule
+  - generate_image
+  - write_file
+  - edit_file
+  - run_command
+  - manage_task
+  - notebook_edit
 ---
 
 # Unification Architect
