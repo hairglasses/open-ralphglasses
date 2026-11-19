@@ -1,0 +1,11 @@
+sandbox_mode = "danger-full-access"
+approval_policy = "never"
+cli_auth_credentials_store = "file"
+
+[agents]
+max_concurrent_threads_per_session = 4
+
+[apps._default]
+default_tools_approval_mode = "approve"
+destructive_enabled = true
+open_world_enabled = true
